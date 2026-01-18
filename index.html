@@ -1,0 +1,4573 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পিকনিক বাজেট ম্যানেজমেন্ট - JSON ডাটাবেজ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* স্টাইল কোড */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #06d6a0;
+            --secondary-dark: #05c490;
+            --accent: #ff9e00;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --danger: #ef476f;
+            --success: #06d6a0;
+            --warning: #ffd166;
+            --info: #118ab2;
+            --border-radius: 12px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient-primary: linear-gradient(135deg, #4361ee, #3a0ca3);
+            --gradient-secondary: linear-gradient(135deg, #06d6a0, #04a777);
+            --gradient-accent: linear-gradient(135deg, #ff9e00, #ff6d00);
+            --gradient-danger: linear-gradient(135deg, #ef476f, #ff6d6d);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* লগইন সিস্টেম */
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-hover);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            animation: slideInUp 0.5s ease;
+            transform: translateY(0);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 35px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .login-icon {
+            font-size: 55px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-body {
+            padding: 35px 30px;
+            background: white;
+            position: relative;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 15px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 18px;
+            z-index: 1;
+        }
+
+        .input-with-icon input {
+            width: 100%;
+            padding: 15px 15px 15px 55px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: var(--transition);
+            background: var(--light);
+            position: relative;
+        }
+
+        .input-with-icon input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.35);
+        }
+
+        .user-type-selector {
+            display: flex;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 2px solid var(--light-gray);
+            background: var(--light);
+        }
+
+        .user-type {
+            flex: 1;
+            text-align: center;
+            padding: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            color: var(--gray);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-type.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
+        }
+
+        .user-type:not(.active):hover {
+            background: rgba(67, 97, 238, 0.05);
+            color: var(--primary);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--light-gray);
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .login-footer strong {
+            color: var(--primary);
+        }
+
+        /* মূল ড্যাশবোর্ড */
+        .dashboard-container {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-hover);
+            overflow: hidden;
+            height: 95vh;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* হেডার */
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 22px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-icon {
+            width: 55px;
+            height: 55px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-text h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .user-details h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            font-size: 13px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* হেডারে PDF ডাউনলোড বাটন */
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .pdf-download-header-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 11px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .pdf-download-header-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 11px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* মূল কন্টেন্ট */
+        .main-content {
+            display: flex;
+            height: calc(100% - 99px);
+        }
+
+        /* সাইডবার */
+        .sidebar {
+            width: 280px;
+            background: #f8fafc;
+            padding: 25px 0;
+            border-right: 1px solid var(--light-gray);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient-primary);
+        }
+
+        .nav-menu {
+            padding: 0 20px;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section-title {
+            font-size: 13px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-left: 15px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: var(--transition);
+            gap: 15px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link i {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .nav-link.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.25);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active i {
+            color: white;
+        }
+
+        .nav-link:not(.active):hover {
+            background: rgba(67, 97, 238, 0.08);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link:not(.active):hover i {
+            color: var(--primary);
+        }
+
+        /* কন্টেন্ট এরিয়া */
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .page-header {
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .page-title {
+            font-size: 32px;
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-subtitle {
+            color: var(--gray);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* ট্যাব কন্টেন্ট */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* স্ট্যাটিসটিক্স */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card.income::before {
+            background: var(--gradient-secondary);
+        }
+
+        .stat-card.expense::before {
+            background: var(--gradient-accent);
+        }
+
+        .stat-card.balance::before {
+            background: linear-gradient(135deg, #7209b7, #4361ee);
+        }
+
+        .stat-card.members::before {
+            background: linear-gradient(135deg, #ef476f, #ff9e00);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .stat-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            background: var(--gradient-primary);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .income .stat-icon {
+            background: var(--gradient-secondary);
+            box-shadow: 0 8px 20px rgba(6, 214, 160, 0.3);
+        }
+
+        .expense .stat-icon {
+            background: var(--gradient-accent);
+            box-shadow: 0 8px 20px rgba(255, 158, 0, 0.3);
+        }
+
+        .balance .stat-icon {
+            background: linear-gradient(135deg, #7209b7, #4361ee);
+            box-shadow: 0 8px 20px rgba(114, 9, 183, 0.3);
+        }
+
+        .members .stat-icon {
+            background: linear-gradient(135deg, #ef476f, #ff9e00);
+            box-shadow: 0 8px 20px rgba(239, 71, 111, 0.3);
+        }
+
+        .stat-change {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 15px;
+            border-radius: 20px;
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .stat-value {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 15px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* কার্ড */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--shadow);
+            margin-bottom: 35px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* ফর্ম */
+        .form-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--shadow);
+            margin-bottom: 35px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 16px;
+        }
+
+        .form-control {
+            position: relative;
+        }
+
+        .form-control input,
+        .form-control select,
+        .form-control textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: var(--transition);
+            background: var(--light);
+        }
+
+        .form-control textarea {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .form-control input:focus,
+        .form-control select:focus,
+        .form-control textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        .form-hint {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* বাটন */
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(6, 214, 160, 0.35);
+        }
+
+        .btn-accent {
+            background: var(--gradient-accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(255, 158, 0, 0.35);
+        }
+
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(239, 71, 111, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(67, 97, 238, 0.05);
+            transform: translateY(-3px);
+        }
+
+        /* টেবিল */
+        .table-container {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 35px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .table-header {
+            padding: 25px 30px;
+            background: #f8fafc;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .table-controls select {
+            padding: 10px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            min-width: 180px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f1f5f9;
+        }
+
+        th {
+            padding: 20px 25px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light-gray);
+            font-size: 15px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 15px;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        /* স্ট্যাটাস */
+        .status {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-paid {
+            background: rgba(6, 214, 160, 0.12);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(255, 158, 0, 0.12);
+            color: var(--accent);
+        }
+
+        .status-paid::before {
+            content: '✓';
+            font-weight: bold;
+        }
+
+        .status-pending::before {
+            content: '!';
+            font-weight: bold;
+        }
+
+        /* একশন বাটন */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+        .edit-btn {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .view-btn {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .view-btn:hover {
+            background: var(--success);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* খরচ আইটেম */
+        .expense-items {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .expense-item {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .expense-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .expense-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .expense-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .expense-description {
+            color: var(--gray);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .expense-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--light-gray);
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .expense-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 15px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 20px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* খাদ ব্যবস্থাপনা */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            border: 2px solid var(--light-gray);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-primary);
+        }
+
+        .category-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .category-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .category-total {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .category-description {
+            color: var(--gray);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .category-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 2px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* রিপোর্ট */
+        .report-preview {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            margin-top: 35px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid var(--light-gray);
+        }
+
+        .report-title {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .report-subtitle {
+            color: var(--gray);
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .report-summary {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .summary-label {
+            color: var(--gray);
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        /* ইউজার প্যানেল */
+        .user-panel {
+            text-align: center;
+            padding: 60px 30px;
+        }
+
+        .user-panel-icon {
+            font-size: 100px;
+            color: var(--primary);
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .user-panel h2 {
+            font-size: 36px;
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .user-panel p {
+            color: var(--gray);
+            margin-bottom: 40px;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        /* মোডাল */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: slideInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* খাদ ফর্ম */
+        .color-picker {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 3px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: var(--dark);
+            transform: scale(1.1);
+        }
+
+        /* ডেটা ম্যানেজমেন্ট */
+        .data-management {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .data-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .data-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .data-card i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .data-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .data-card p {
+            color: var(--gray);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* স্ক্রলবার */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* রেস্পন্সিভ */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                max-width: 95vw;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 300px;
+                border-right: none;
+                border-bottom: 1px solid var(--light-gray);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .table-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .page-title {
+                font-size: 28px;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container,
+            .dashboard-container {
+                border-radius: 15px;
+            }
+            
+            .login-header,
+            .login-body {
+                padding: 25px 20px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .content-area {
+                padding: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+        }
+
+        /* ইউটিলিটি */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mb-25 { margin-bottom: 25px; }
+        .mb-30 { margin-bottom: 30px; }
+        .mb-40 { margin-bottom: 40px; }
+        .mt-25 { margin-top: 25px; }
+        .mt-30 { margin-top: 30px; }
+        .mt-40 { margin-top: 40px; }
+        .d-flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .align-center { align-items: center; }
+        .gap-15 { gap: 15px; }
+        .gap-20 { gap: 20px; }
+        .gap-25 { gap: 25px; }
+        .w-100 { width: 100%; }
+        .hidden { display: none; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        .empty-state p {
+            font-size: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* নতুন স্টাইল */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .quick-action-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+        
+        .quick-action-btn i {
+            font-size: 40px;
+            color: var(--primary);
+        }
+        
+        .quick-action-btn span {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            text-align: center;
+        }
+        
+        .export-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .export-btn {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            color: var(--dark);
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+        
+        .info-box {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--primary);
+            box-shadow: var(--shadow);
+        }
+        
+        .info-box-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .info-box-content {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+        
+        /* JSON ডাটাবেজ স্ট্যাটাস */
+        .database-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            border-left: 4px solid var(--success);
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .database-status i {
+            font-size: 24px;
+            color: var(--success);
+        }
+        
+        .database-status.error {
+            border-left-color: var(--danger);
+        }
+        
+        .database-status.error i {
+            color: var(--danger);
+        }
+        
+        .database-status.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .database-status.warning i {
+            color: var(--warning);
+        }
+        
+        .db-storage-info {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .db-file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .db-file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .db-file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .db-file-size {
+            font-size: 12px;
+            color: var(--gray);
+            background: var(--light);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .db-backup-status {
+            padding: 10px 15px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* PDF মডাল স্টাইল */
+        .pdf-preview-modal {
+            max-width: 900px;
+        }
+        
+        .pdf-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .report-template {
+            background: white;
+            padding: 40px;
+            min-height: 600px;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 20px;
+        }
+        
+        .report-title {
+            color: var(--primary);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .report-date {
+            color: var(--gray);
+            font-size: 16px;
+        }
+        
+        .report-summary-section {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .student-report-table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .student-report-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+        }
+        
+        .student-report-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .expense-report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid var(--light-gray);
+        }
+        
+        /* PDF ডাউনলোড মডাল স্টাইল */
+        .pdf-download-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .pdf-option-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid var(--light-gray);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .pdf-option-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .pdf-option-card i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .pdf-option-card h4 {
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .pdf-option-card p {
+            color: var(--gray);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- লগইন পেজ -->
+    <div id="loginPage" class="login-container">
+        <div class="login-header">
+            <div class="login-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <h1>পিকনিক ম্যানেজমেন্ট</h1>
+            <p>JSON ডাটাবেজ সিস্টেম</p>
+        </div>
+        
+        <div class="login-body">
+            <div class="user-type-selector">
+                <div class="user-type active" data-type="admin">
+                    <i class="fas fa-user-shield"></i> অ্যাডমিন
+                </div>
+                <div class="user-type" data-type="user">
+                    <i class="fas fa-user"></i> ইউজার
+                </div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">ইউজারনেম</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" placeholder="আপনার ইউজারনেম দিন" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">পাসওয়ার্ড</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="আপনার পাসওয়ার্ড দিন" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> লগইন করুন
+                </button>
+                
+                <div class="login-footer">
+                    <p><strong>ডিফল্ট লগইন তথ্য:</strong></p>
+                    <p>অ্যাডমিন: admin / Bokachoda Kisui Nai</p>
+                    <p>ইউজার: user / user123</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- মূল ড্যাশবোর্ড -->
+    <div id="dashboard" class="dashboard-container">
+        <!-- হেডার -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>পিকনিক বাজেট ম্যানেজমেন্ট</h2>
+                    <p>JSON ফাইল ডাটাবেজ সিস্টেম</p>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <h4 id="currentUser">অ্যাডমিন</h4>
+                    <p id="userRole">অ্যাডমিন</p>
+                </div>
+                <div class="header-actions">
+                    <!-- PDF ডাউনলোড বাটন (শুধু অ্যাডমিনের জন্য) -->
+                    <button id="pdfDownloadHeaderBtn" class="pdf-download-header-btn hidden">
+                        <i class="fas fa-file-pdf"></i> PDF ডাউনলোড
+                    </button>
+                    <button id="logoutBtn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> লগআউট
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- মূল কন্টেন্ট -->
+        <div class="main-content">
+            <!-- সাইডবার -->
+            <div class="sidebar">
+                <div class="nav-menu">
+                    <!-- অ্যাডমিন মেনু -->
+                    <div class="nav-section admin-menu">
+                        <div class="nav-section-title">অ্যাডমিন কন্ট্রোল</div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link active" data-tab="dashboardTab">
+                                <i class="fas fa-home"></i>
+                                <span>ড্যাশবোর্ড</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="studentTab">
+                                <i class="fas fa-user-plus"></i>
+                                <span>ছাত্র যোগ করুন</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="allStudentsTab">
+                                <i class="fas fa-users"></i>
+                                <span>সকল ছাত্র</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="categoryTab">
+                                <i class="fas fa-tags"></i>
+                                <span>খাদ ব্যবস্থাপনা</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="expenseTab">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>খরচ যোগ করুন</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="databaseTab">
+                                <i class="fas fa-database"></i>
+                                <span>ডাটাবেজ ম্যানেজমেন্ট</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="reportTab">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>PDF রিপোর্ট</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- ইউজার মেনু -->
+                    <div class="nav-section user-menu hidden">
+                        <div class="nav-section-title">ইউজার অপশন</div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link active" data-tab="userViewTab">
+                                <i class="fas fa-eye"></i>
+                                <span>ডেটা দেখুন</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link" data-tab="userReportTab">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>PDF ডাউনলোড</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- কন্টেন্ট এরিয়া -->
+            <div class="content-area">
+                <!-- ড্যাশবোর্ড ট্যাব -->
+                <div id="dashboardTab" class="tab-content active">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-home"></i>
+                            <span id="dashboardTitle">ড্যাশবোর্ড</span>
+                        </h1>
+                        <p class="page-subtitle" id="dashboardSubtitle">JSON ফাইল ডাটাবেজ সিস্টেম - সব ডাটা data/ ফোল্ডারে সেভ হবে</p>
+                    </div>
+                    
+                    <!-- ডাটাবেজ ইনফো -->
+                    <div class="info-box">
+                        <div class="info-box-title">JSON ফাইল ডাটাবেজ সিস্টেম</div>
+                        <div class="info-box-content">
+                            <p>এই সিস্টেমে সব ডাটা <strong>data/</strong> ফোল্ডারে JSON ফাইলে সেভ হবে। প্রতিবার ডাটা পরিবর্তন করলে অটোমেটিকভাবে JSON ফাইল আপডেট হবে।</p>
+                            <div class="db-storage-info">
+                                <p><strong>ডাটা সেভ হওয়ার স্থান:</strong> <code>data/students.json</code>, <code>data/expenses.json</code>, <code>data/categories.json</code></p>
+                                <p><strong>ব্যাকআপ ফাইল:</strong> <code>data/backups/</code> ফোল্ডারে স্বয়ংক্রিয় ব্যাকআপ তৈরি হবে</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- স্ট্যাটিসটিক্স -->
+                    <div class="stats-grid">
+                        <div class="stat-card income">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="stat-change" id="incomeChange">+0%</div>
+                            </div>
+                            <div class="stat-value" id="totalIncome">৳ 0</div>
+                            <div class="stat-label">মোট আদায়</div>
+                        </div>
+                        
+                        <div class="stat-card expense">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                                <div class="stat-change" id="expenseChange">+0%</div>
+                            </div>
+                            <div class="stat-value" id="totalExpense">৳ 0</div>
+                            <div class="stat-label">মোট খরচ</div>
+                        </div>
+                        
+                        <div class="stat-card balance">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="stat-change" id="balanceChange">+0%</div>
+                            </div>
+                            <div class="stat-value" id="totalBalance">৳ 0</div>
+                            <div class="stat-label">বাকি টাকা</div>
+                        </div>
+                        
+                        <div class="stat-card members">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-change" id="membersChange">+0%</div>
+                            </div>
+                            <div class="stat-value" id="totalMembers">0</div>
+                            <div class="stat-label">মোট সদস্য</div>
+                        </div>
+                    </div>
+                    
+                    <!-- কুইক অ্যাকশন -->
+                    <div class="quick-actions">
+                        <div class="quick-action-btn" onclick="switchToTab('studentTab')">
+                            <i class="fas fa-user-plus"></i>
+                            <span>ছাত্র যোগ করুন</span>
+                        </div>
+                        <div class="quick-action-btn" onclick="switchToTab('allStudentsTab')">
+                            <i class="fas fa-users"></i>
+                            <span>সকল ছাত্র দেখুন</span>
+                        </div>
+                        <div class="quick-action-btn" onclick="switchToTab('categoryTab')">
+                            <i class="fas fa-tags"></i>
+                            <span>খাদ ব্যবস্থাপনা</span>
+                        </div>
+                        <div class="quick-action-btn" onclick="switchToTab('expenseTab')">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>খরচ যোগ করুন</span>
+                        </div>
+                        <div class="quick-action-btn" onclick="switchToTab('databaseTab')">
+                            <i class="fas fa-database"></i>
+                            <span>ডাটাবেজ ম্যানেজ</span>
+                        </div>
+                    </div>
+                    
+                    <!-- ডেটা বিশ্লেষণ -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-bar"></i>
+                                ডেটা বিশ্লেষণ
+                            </h3>
+                            <div class="table-controls">
+                                <select id="chartFilter">
+                                    <option value="expense">খরচ বিশ্লেষণ</option>
+                                    <option value="class">শ্রেণি বিশ্লেষণ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <canvas id="analysisChart" height="120"></canvas>
+                    </div>
+                </div>
+                
+                <!-- ছাত্র যোগ ট্যাব -->
+                <div id="studentTab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-user-plus"></i>
+                            ছাত্র যোগ করুন
+                        </h1>
+                        <p class="page-subtitle">নতুন ছাত্র/ছাত্রী যোগ করুন এবং টাকা আদায় করুন</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-user-graduate"></i>
+                                ছাত্র/ছাত্রীর তথ্য
+                            </h3>
+                        </div>
+                        
+                        <form id="studentForm">
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="studentName">ছাত্র/ছাত্রীর নাম *</label>
+                                    <input type="text" id="studentName" placeholder="পূর্ণ নাম লিখুন" required>
+                                </div>
+                                <div class="form-control">
+                                    <label for="studentClass">শ্রেণি *</label>
+                                    <select id="studentClass" required>
+                                        <option value="">শ্রেণি নির্বাচন করুন</option>
+                                        <option value="1">শ্রেণি ১ (৳ ৮৫০)</option>
+                                        <option value="2">শ্রেণি ২ (৳ ৮৫০)</option>
+                                        <option value="3">শ্রেণি ৩ (৳ ৮৫০)</option>
+                                        <option value="4">শ্রেণি ৪ (৳ ৮৫০)</option>
+                                        <option value="5">শ্রেণি ৫ (৳ ৮৫০)</option>
+                                        <option value="6">শ্রেণি ৬ (৳ ৮৫০)</option>
+                                        <option value="7">শ্রেণি ৭ (৳ ৮৫০)</option>
+                                        <option value="8">শ্রেণি ৮ (৳ ৮৫০)</option>
+                                        <option value="9">শ্রেণি ৯ (৳ ৮৫০)</option>
+                                        <option value="10">শ্রেণি ১০ (৳ ৯০০)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="studentAmount">আদায়কৃত টাকা *</label>
+                                    <input type="number" id="studentAmount" placeholder="টাকার পরিমাণ লিখুন" required>
+                                    <span class="form-hint" id="amountHint"></span>
+                                </div>
+                                <div class="form-control">
+                                    <label for="paymentDate">আদায়ের তারিখ *</label>
+                                    <input type="date" id="paymentDate" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="studentPhone">ফোন নম্বর</label>
+                                    <input type="text" id="studentPhone" placeholder="০১XXXXXXXXX">
+                                </div>
+                                <div class="form-control">
+                                    <label for="studentGuardian">অভিভাবকের নাম</label>
+                                    <input type="text" id="studentGuardian" placeholder="অভিভাবকের নাম">
+                                </div>
+                            </div>
+                            
+                            <div class="form-control">
+                                <label for="studentNote">মন্তব্য</label>
+                                <textarea id="studentNote" placeholder="যেকোনো মন্তব্য লিখুন..."></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-between align-center mt-40">
+                                <button type="reset" class="btn btn-outline">
+                                    <i class="fas fa-redo"></i> রিসেট করুন
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> সংরক্ষণ করুন
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- সকল ছাত্র ট্যাব -->
+                <div id="allStudentsTab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-users"></i>
+                            সকল ছাত্র
+                        </h1>
+                        <p class="page-subtitle">সমস্ত ছাত্র/ছাত্রীর তালিকা, সম্পাদনা ও মুছে ফেলুন</p>
+                    </div>
+                    
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">ছাত্র তালিকা</h3>
+                            <div class="table-controls">
+                                <select id="classFilterAll">
+                                    <option value="">সকল শ্রেণি</option>
+                                    <option value="1">শ্রেণি ১</option>
+                                    <option value="2">শ্রেণি ২</option>
+                                    <option value="3">শ্রেণি ৩</option>
+                                    <option value="4">শ্রেণি ৪</option>
+                                    <option value="5">শ্রেণি ৫</option>
+                                    <option value="6">শ্রেণি ৬</option>
+                                    <option value="7">শ্রেণি ৭</option>
+                                    <option value="8">শ্রেণি ৮</option>
+                                    <option value="9">শ্রেণি ৯</option>
+                                    <option value="10">শ্রেণি ১০</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="switchToTab('studentTab')">
+                                    <i class="fas fa-user-plus"></i> নতুন যোগ করুন
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ক্রম</th>
+                                    <th>নাম</th>
+                                    <th>শ্রেণি</th>
+                                    <th>চাদা</th>
+                                    <th>আদায়কৃত</th>
+                                    <th>তারিখ</th>
+                                    <th>অবস্থা</th>
+                                    <th>কার্যক্রম</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allStudentTableBody">
+                                <!-- টেবিল ডেটা এখানে যোগ হবে -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="emptyAllStudentState" class="empty-state hidden">
+                            <i class="fas fa-users-slash"></i>
+                            <h3>কোন ছাত্র/ছাত্রী পাওয়া যায়নি</h3>
+                            <p>প্রথমে ছাত্র যোগ করুন</p>
+                            <button class="btn btn-primary mt-25" onclick="switchToTab('studentTab')">
+                                <i class="fas fa-user-plus"></i> ছাত্র যোগ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- খাদ ব্যবস্থাপনা ট্যাব -->
+                <div id="categoryTab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-tags"></i>
+                            খাদ ব্যবস্থাপনা
+                        </h1>
+                        <p class="page-subtitle">আপনার নিজের খাদ যোগ করুন, সম্পাদনা করুন এবং মুছুন</p>
+                    </div>
+                    
+                    <!-- নতুন খাদ ফর্ম -->
+                    <div class="card mb-40">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-plus-circle"></i>
+                                নতুন খাদ যোগ করুন
+                            </h3>
+                        </div>
+                        
+                        <form id="categoryForm">
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="categoryName">খাদের নাম *</label>
+                                    <input type="text" id="categoryName" placeholder="যেমন: যানবাহন, খাবার, ইত্যাদি" required>
+                                </div>
+                                <div class="form-control">
+                                    <label for="categoryColor">রং নির্বাচন করুন *</label>
+                                    <div class="color-picker" id="colorPicker">
+                                        <div class="color-option selected" style="background: #4361ee;" data-color="#4361ee"></div>
+                                        <div class="color-option" style="background: #06d6a0;" data-color="#06d6a0"></div>
+                                        <div class="color-option" style="background: #ff9e00;" data-color="#ff9e00"></div>
+                                        <div class="color-option" style="background: #ef476f;" data-color="#ef476f"></div>
+                                        <div class="color-option" style="background: #7209b7;" data-color="#7209b7"></div>
+                                        <div class="color-option" style="background: #3a0ca3;" data-color="#3a0ca3"></div>
+                                    </div>
+                                    <input type="hidden" id="categoryColor" value="#4361ee" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-control">
+                                <label for="categoryDescription">খাদের বিবরণ</label>
+                                <textarea id="categoryDescription" placeholder="খাদের সংক্ষিপ্ত বিবরণ লিখুন..."></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-between align-center mt-40">
+                                <button type="reset" class="btn btn-outline">
+                                    <i class="fas fa-redo"></i> রিসেট
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> খাদ যোগ করুন
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- খাদ তালিকা -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i>
+                                খাদ তালিকা
+                            </h3>
+                            <div class="table-controls">
+                                <span id="categoryCount">মোট খাদ: 0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-grid" id="categoryList">
+                            <!-- খাদ কার্ড এখানে যোগ হবে -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- খরচ যোগ ট্যাব -->
+                <div id="expenseTab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-money-bill-wave"></i>
+                            খরচ যোগ করুন
+                        </h1>
+                        <p class="page-subtitle">খাদ অনুযায়ী নতুন খরচ যোগ করুন</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-receipt"></i>
+                                খরচের তথ্য
+                            </h3>
+                        </div>
+                        
+                        <form id="expenseForm">
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="expenseName">খরচের নাম *</label>
+                                    <input type="text" id="expenseName" placeholder="খরচের নাম লিখুন" required>
+                                </div>
+                                <div class="form-control">
+                                    <label for="expenseCategory">খাদ নির্বাচন করুন *</label>
+                                    <select id="expenseCategory" required>
+                                        <option value="">খাদ নির্বাচন করুন</option>
+                                        <!-- খাদ অপশন এখানে যোগ হবে -->
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="expenseAmount">পরিমাণ (টাকা) *</label>
+                                    <input type="number" id="expenseAmount" placeholder="টাকার পরিমাণ লিখুন" required>
+                                </div>
+                                <div class="form-control">
+                                    <label for="expenseDate">তারিখ *</label>
+                                    <input type="date" id="expenseDate" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-control">
+                                <label for="expenseDescription">বিবরণ *</label>
+                                <textarea id="expenseDescription" placeholder="খরচের বিস্তারিত বিবরণ লিখুন..." required></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-control">
+                                    <label for="expenseReceipt">রশিদ নম্বর</label>
+                                    <input type="text" id="expenseReceipt" placeholder="রশিদ/বিল নম্বর">
+                                </div>
+                                <div class="form-control">
+                                    <label for="expensePaidTo">প্রাপকের নাম</label>
+                                    <input type="text" id="expensePaidTo" placeholder="টাকা কার কাছে দিয়েছেন">
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-between align-center mt-40">
+                                <button type="reset" class="btn btn-outline">
+                                    <i class="fas fa-redo"></i> রিসেট করুন
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle"></i> খরচ যোগ করুন
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- ডাটাবেজ ম্যানেজমেন্ট ট্যাব -->
+                <div id="databaseTab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-database"></i>
+                            ডাটাবেজ ম্যানেজমেন্ট
+                        </h1>
+                        <p class="page-subtitle">JSON ফাইল ডাটাবেজ ব্যবস্থাপনা ও ব্যাকআপ</p>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-title">JSON ফাইল ডাটাবেজ সিস্টেম</div>
+                        <div class="info-box-content">
+                            <p>এই সিস্টেমে সব ডাটা <strong>data/</strong> ফোল্ডারে JSON ফাইলে সেভ হয়। প্রতিটি অপারেশনের পর অটোমেটিকভাবে JSON ফাইল আপডেট হয়।</p>
+                            <div class="db-file-list" id="dbFileList">
+                                <!-- ফাইল লিস্ট এখানে যোগ হবে -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ডাটা অপারেশন -->
+                    <div class="data-management">
+                        <div class="data-card">
+                            <i class="fas fa-save"></i>
+                            <h3>ডাটা সেভ করুন</h3>
+                            <p>বর্তমান ডাটা JSON ফাইলে সেভ করুন</p>
+                            <button class="btn btn-primary w-100" onclick="saveAllData()">
+                                <i class="fas fa-save"></i> এখনই সেভ করুন
+                            </button>
+                            <div class="db-backup-status" id="lastSaveTime">
+                                সর্বশেষ সেভ: লোড হচ্ছে...
+                            </div>
+                        </div>
+                        
+                        <div class="data-card">
+                            <i class="fas fa-history"></i>
+                            <h3>ডাটা লোড করুন</h3>
+                            <p>JSON ফাইল থেকে ডাটা লোড করুন</p>
+                            <button class="btn btn-secondary w-100" onclick="loadAllData()">
+                                <i class="fas fa-sync"></i> ডাটা রিফ্রেশ করুন
+                            </button>
+                            <div class="db-backup-status" id="lastLoadTime">
+                                সর্বশেষ লোড: লোড হচ্ছে...
+                            </div>
+                        </div>
+                        
+                        <div class="data-card">
+                            <i class="fas fa-download"></i>
+                            <h3>ডাটা ব্যাকআপ</h3>
+                            <p>সম্পূর্ণ ডাটা JSON ফাইল হিসেবে ডাউনলোড</p>
+                            <button class="btn btn-accent w-100" onclick="downloadFullBackup()">
+                                <i class="fas fa-download"></i> ব্যাকআপ ডাউনলোড
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- অটো ব্যাকআপ সেটিংস -->
+                    <div class="card mt-40">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-cog"></i>
+                                অটো সেভ সেটিংস
+                            </h3>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-control">
+                                <label for="autoSaveInterval">অটো সেভ ইন্টারভাল</label>
+                                <select id="autoSaveInterval">
+                                    <option value="0">অটো সেভ বন্ধ</option>
+                                    <option value="30000">৩০ সেকেন্ড</option>
+                                    <option value="60000" selected>১ মিনিট</option>
+                                    <option value="300000">৫ মিনিট</option>
+                                    <option value="600000">১০ মিনিট</option>
+                                </select>
+                            </div>
+                            <div class="form-control">
+                                <label for="backupDays">ব্যাকআপ রাখার দিন</label>
+                                <select id="backupDays">
+                                    <option value="7">৭ দিন</option>
+                                    <option value="15" selected>১৫ দিন</option>
+                                    <option value="30">৩০ দিন</option>
+                                    <option value="90">৯০ দিন</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-between align-center mt-40">
+                            <button class="btn btn-outline" onclick="clearOldBackups()">
+                                <i class="fas fa-trash"></i> পুরানো ব্যাকআপ মুছুন
+                            </button>
+                            <button class="btn btn-primary" onclick="saveSettings()">
+                                <i class="fas fa-save"></i> সেটিংস সেভ করুন
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- ডাটা রিস্টোর -->
+                    <div class="card mt-40">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-upload"></i>
+                                ডাটা রিস্টোর
+                            </h3>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label for="backupFile">ব্যাকআপ ফাইল নির্বাচন করুন</label>
+                            <input type="file" id="backupFile" accept=".json" class="w-100" style="padding: 15px; border: 2px dashed var(--light-gray); border-radius: 10px;">
+                        </div>
+                        
+                        <div class="d-flex justify-between align-center mt-40">
+                            <button class="btn btn-outline" onclick="document.getElementById('backupFile').value=''">
+                                <i class="fas fa-times"></i> ক্লিয়ার
+                            </button>
+                            <button class="btn btn-danger" onclick="restoreFromBackup()">
+                                <i class="fas fa-upload"></i> ডাটা রিস্টোর করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PDF রিপোর্ট ট্যাব -->
+                <div id="reportTab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-file-pdf"></i>
+                            PDF রিপোর্ট
+                        </h1>
+                        <p class="page-subtitle">বিভিন্ন ধরনের PDF রিপোর্ট তৈরি ও ডাউনলোড করুন</p>
+                    </div>
+                    
+                    <div class="export-buttons">
+                        <button class="btn btn-primary export-btn" onclick="downloadStudentReport()">
+                            <i class="fas fa-user-graduate"></i> ছাত্র রিপোর্ট
+                        </button>
+                        <button class="btn btn-secondary export-btn" onclick="downloadExpenseReport()">
+                            <i class="fas fa-receipt"></i> খরচ রিপোর্ট
+                        </button>
+                        <button class="btn btn-accent export-btn" onclick="downloadCategoryReport()">
+                            <i class="fas fa-tags"></i> খাদ রিপোর্ট
+                        </button>
+                        <button class="btn btn-danger export-btn" onclick="downloadFullReport()">
+                            <i class="fas fa-file-pdf"></i> সম্পূর্ণ রিপোর্ট
+                        </button>
+                    </div>
+                    
+                    <div class="card mt-40">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-cog"></i>
+                                কাস্টম রিপোর্ট তৈরি করুন
+                            </h3>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-control">
+                                <label for="reportType">রিপোর্ট টাইপ *</label>
+                                <select id="reportType">
+                                    <option value="class">শ্রেণি ভিত্তিক রিপোর্ট</option>
+                                    <option value="expense">খরচ বিশ্লেষণ রিপোর্ট</option>
+                                    <option value="full">সম্পূর্ণ বাজেট রিপোর্ট</option>
+                                    <option value="summary">সারাংশ রিপোর্ট</option>
+                                </select>
+                            </div>
+                            <div class="form-control">
+                                <label for="reportClass">শ্রেণি নির্বাচন করুন</label>
+                                <select id="reportClass">
+                                    <option value="">সকল শ্রেণি</option>
+                                    <option value="1">শ্রেণি ১</option>
+                                    <option value="2">শ্রেণি ২</option>
+                                    <option value="3">শ্রেণি ৩</option>
+                                    <option value="4">শ্রেণি ৪</option>
+                                    <option value="5">শ্রেণি ৫</option>
+                                    <option value="6">শ্রেণি ৬</option>
+                                    <option value="7">শ্রেণি ৭</option>
+                                    <option value="8">শ্রেণি ৮</option>
+                                    <option value="9">শ্রেণি ৯</option>
+                                    <option value="10">শ্রেণি ১০</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label for="reportTitle">রিপোর্টের শিরোনাম</label>
+                            <input type="text" id="reportTitle" value="পিকনিক বাজেট রিপোর্ট - রাজশাহী সাফিনা পার্ক">
+                        </div>
+                        
+                        <div class="d-flex justify-between align-center mt-40">
+                            <button class="btn btn-secondary" id="previewReportBtn">
+                                <i class="fas fa-eye"></i> রিপোর্ট দেখুন
+                            </button>
+                            <button class="btn btn-primary" id="downloadPdfBtn">
+                                <i class="fas fa-download"></i> PDF ডাউনলোড করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ইউজার ভিউ ট্যাব -->
+                <div id="userViewTab" class="tab-content">
+                    <div class="user-panel">
+                        <div class="user-panel-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h2>ডেটা দেখুন</h2>
+                        <p>এখানে আপনি শুধুমাত্র ডেটা দেখতে পারবেন। ডেটা যোগ, সম্পাদনা বা মুছে ফেলার অনুমতি নেই।</p>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-pie"></i>
+                                    সারাংশ
+                                </h3>
+                            </div>
+                            
+                            <div class="user-stats">
+                                <div class="stat-card income">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="stat-value" id="userTotalIncome">৳ 0</div>
+                                    <div class="stat-label">মোট আদায়</div>
+                                </div>
+                                
+                                <div class="stat-card expense">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <div class="stat-value" id="userTotalExpense">৳ 0</div>
+                                    <div class="stat-label">মোট খরচ</div>
+                                </div>
+                                
+                                <div class="stat-card balance">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-wallet"></i>
+                                    </div>
+                                    <div class="stat-value" id="userTotalBalance">৳ 0</div>
+                                    <div class="stat-label">বাকি টাকা</div>
+                                </div>
+                                
+                                <div class="stat-card members">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-value" id="userTotalMembers">0</div>
+                                    <div class="stat-label">মোট সদস্য</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ইউজার রিপোর্ট ট্যাব -->
+                <div id="userReportTab" class="tab-content">
+                    <div class="user-panel">
+                        <div class="user-panel-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h2>PDF রিপোর্ট ডাউনলোড</h2>
+                        <p>এখানে আপনি বিভিন্ন রিপোর্ট PDF আকারে ডাউনলোড করতে পারবেন।</p>
+                        
+                        <div class="export-buttons">
+                            <button class="btn btn-primary export-btn" onclick="userDownloadSummaryReport()">
+                                <i class="fas fa-file-alt"></i> সারাংশ রিপোর্ট
+                            </button>
+                            <button class="btn btn-secondary export-btn" onclick="userDownloadStudentReport()">
+                                <i class="fas fa-user-graduate"></i> ছাত্র রিপোর্ট
+                            </button>
+                            <button class="btn btn-accent export-btn" onclick="userDownloadExpenseReport()">
+                                <i class="fas fa-receipt"></i> খরচ রিপোর্ট
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF প্রিভিউ মডাল -->
+    <div id="pdfPreviewModal" class="modal">
+        <div class="modal-content pdf-preview-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">PDF রিপোর্ট প্রিভিউ</h3>
+                <button class="close-modal" onclick="closePdfPreview()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="report-template" id="reportTemplate">
+                    <!-- PDF কন্টেন্ট এখানে লোড হবে -->
+                </div>
+                <div class="pdf-controls">
+                    <button class="btn btn-outline" onclick="closePdfPreview()">
+                        <i class="fas fa-times"></i> বন্ধ করুন
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadCurrentPdf()">
+                        <i class="fas fa-download"></i> PDF ডাউনলোড করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF ডাউনলোড অপশন মডাল -->
+    <div id="pdfDownloadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">PDF ডাউনলোড অপশন</h3>
+                <button class="close-modal" onclick="closePdfDownloadModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px; color: var(--gray);">আপনি কোন ধরনের রিপোর্ট ডাউনলোড করতে চান?</p>
+                
+                <div class="pdf-download-options">
+                    <div class="pdf-option-card" onclick="downloadAllDataPdf()">
+                        <i class="fas fa-file-pdf"></i>
+                        <h4>সম্পূর্ণ ডাটা রিপোর্ট</h4>
+                        <p>সকল ছাত্র, খরচ এবং বিশ্লেষণ একসাথে</p>
+                    </div>
+                    
+                    <div class="pdf-option-card" onclick="downloadStudentListPdf()">
+                        <i class="fas fa-users"></i>
+                        <h4>ছাত্র তালিকা</h4>
+                        <p>সমস্ত ছাত্র/ছাত্রীর বিস্তারিত তালিকা</p>
+                    </div>
+                    
+                    <div class="pdf-option-card" onclick="downloadExpenseListPdf()">
+                        <i class="fas fa-receipt"></i>
+                        <h4>খরচ তালিকা</h4>
+                        <p>সমস্ত খরচের বিস্তারিত বিবরণ</p>
+                    </div>
+                    
+                    <div class="pdf-option-card" onclick="downloadSummaryReportPdf()">
+                        <i class="fas fa-chart-pie"></i>
+                        <h4>সারাংশ রিপোর্ট</h4>
+                        <p>মোট আদায়, খরচ এবং ব্যালেন্স</p>
+                    </div>
+                    
+                    <div class="pdf-option-card" onclick="downloadCategoryWisePdf()">
+                        <i class="fas fa-tags"></i>
+                        <h4>খাদ অনুযায়ী রিপোর্ট</h4>
+                        <p>খাদ ভিত্তিক খরচ বিশ্লেষণ</p>
+                    </div>
+                    
+                    <div class="pdf-option-card" onclick="downloadClassWisePdf()">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>শ্রেণি অনুযায়ী রিপোর্ট</h4>
+                        <p>শ্রেণি ভিত্তিক আদায় বিশ্লেষণ</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-between align-center mt-40">
+                    <button class="btn btn-outline" onclick="closePdfDownloadModal()">
+                        <i class="fas fa-times"></i> বাতিল করুন
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadAllReports()">
+                        <i class="fas fa-download"></i> সব রিপোর্ট ডাউনলোড
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ডাটাবেজ স্ট্যাটাস বার -->
+    <div id="databaseStatus" class="database-status hidden">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <div style="font-weight: 600;" id="statusTitle">ডাটা সেভ হয়েছে</div>
+            <div style="font-size: 13px; color: var(--gray);" id="statusMessage">data/students.json ফাইলে সেভ করা হয়েছে</div>
+        </div>
+    </div>
+
+    <!-- জাভাস্ক্রিপ্ট -->
+    <script>
+        // ডেটা ভেরিয়েবল
+        let students = [];
+        let expenses = [];
+        let categories = [];
+        let isAdmin = false;
+        let autoSaveInterval = null;
+        let lastSaveTime = null;
+        let lastLoadTime = null;
+        let currentReportData = null;
+        
+        // ডিফল্ট ক্রেডেনশিয়াল
+        const adminPassword = 'admin123';
+        const userPassword = 'user123';
+        
+        // ফাইল পাথ
+        const DATA_FOLDER = 'data/';
+        const BACKUP_FOLDER = 'data/backups/';
+        
+        // শ্রেণি অনুযায়ী চাদার হার
+        const classFees = {
+            '1': 850, '2': 850, '3': 850, '4': 850, '5': 850,
+            '6': 850, '7': 850, '8': 850, '9': 850, '10': 900
+        };
+        
+        // DOM লোড হওয়ার পর
+        document.addEventListener('DOMContentLoaded', function() {
+            // ডেটা লোড করুন
+            loadAllData();
+            
+            // লগইন ফর্ম
+            const loginForm = document.getElementById('loginForm');
+            const userTypeSelector = document.querySelectorAll('.user-type');
+            
+            // ইউজার টাইপ সিলেক্টর
+            userTypeSelector.forEach(type => {
+                type.addEventListener('click', function() {
+                    userTypeSelector.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // লগইন ফর্ম সাবমিট
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const selectedType = document.querySelector('.user-type.active').getAttribute('data-type');
+                
+                if (selectedType === 'admin') {
+                    if (username === 'admin' && password === adminPassword) {
+                        isAdmin = true;
+                        loginSuccess('অ্যাডমিন', 'admin');
+                    } else {
+                        showDatabaseStatus('লগইন ব্যর্থ', 'ভুল ইউজারনেম বা পাসওয়ার্ড!', 'error');
+                    }
+                } else {
+                    if (username === 'user' && password === userPassword) {
+                        isAdmin = false;
+                        loginSuccess('ইউজার', 'user');
+                    } else {
+                        showDatabaseStatus('লগইন ব্যর্থ', 'ভুল ইউজারনেম বা পাসওয়ার্ড!', 'error');
+                    }
+                }
+            });
+            
+            // লগইন সফল হলে
+            function loginSuccess(displayName, role) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+                document.getElementById('currentUser').textContent = displayName;
+                document.getElementById('userRole').textContent = displayName;
+                document.getElementById('dashboardTitle').textContent = isAdmin ? 'অ্যাডমিন ড্যাশবোর্ড' : 'ইউজার ড্যাশবোর্ড';
+                document.getElementById('dashboardSubtitle').textContent = isAdmin ? 
+                    'JSON ফাইল ডাটাবেজ সিস্টেম - সব ডাটা data/ ফোল্ডারে সেভ হবে' : 
+                    'শুধুমাত্র ডেটা দেখুন এবং রিপোর্ট ডাউনলোড করুন';
+                
+                // ইউজার টাইপ অনুযায়ী মেনু শো/হাইড
+                if (isAdmin) {
+                    document.querySelector('.admin-menu').classList.remove('hidden');
+                    document.querySelector('.user-menu').classList.add('hidden');
+                    // PDF ডাউনলোড বাটন শো করুন
+                    document.getElementById('pdfDownloadHeaderBtn').classList.remove('hidden');
+                    // ডিফল্ট ট্যাব সেট
+                    switchToTab('dashboardTab');
+                } else {
+                    document.querySelector('.admin-menu').classList.add('hidden');
+                    document.querySelector('.user-menu').classList.remove('hidden');
+                    // PDF ডাউনলোড বাটন হাইড করুন
+                    document.getElementById('pdfDownloadHeaderBtn').classList.add('hidden');
+                    // ইউজার ডিফল্ট ট্যাব সেট
+                    switchToTab('userViewTab');
+                }
+                
+                // আজকের তারিখ সেট করুন
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('paymentDate').value = today;
+                document.getElementById('expenseDate').value = today;
+                
+                // অটো সেভ শুরু করুন
+                startAutoSave();
+                
+                showDatabaseStatus('লগইন সফল', `${displayName} হিসেবে লগইন হয়েছে`, 'success');
+            }
+            
+            // হেডারে PDF ডাউনলোড বাটন
+            document.getElementById('pdfDownloadHeaderBtn').addEventListener('click', function() {
+                openPdfDownloadModal();
+            });
+            
+            // লগআউট
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('আপনি কি লগআউট করতে চান?')) {
+                    // অটো সেভ বন্ধ করুন
+                    stopAutoSave();
+                    
+                    // ডাটা সেভ করুন
+                    saveAllData();
+                    
+                    document.getElementById('dashboard').style.display = 'none';
+                    document.getElementById('loginPage').style.display = 'block';
+                    loginForm.reset();
+                    
+                    // ইউজার টাইপ রিসেট
+                    userTypeSelector.forEach((type, index) => {
+                        if (index === 0) {
+                            type.classList.add('active');
+                        } else {
+                            type.classList.remove('active');
+                        }
+                    });
+                    
+                    showDatabaseStatus('লগআউট সফল', 'সব ডাটা JSON ফাইলে সেভ হয়েছে', 'success');
+                }
+            });
+            
+            // নেভিগেশন ট্যাব স্যুইচ
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const tabId = this.getAttribute('data-tab');
+                    switchToTab(tabId);
+                });
+            });
+            
+            // ছাত্র ফর্ম - শ্রেণি পরিবর্তন
+            document.getElementById('studentClass').addEventListener('change', function() {
+                const selectedClass = this.value;
+                if (selectedClass && classFees[selectedClass]) {
+                    document.getElementById('studentAmount').value = classFees[selectedClass];
+                    document.getElementById('amountHint').textContent = `শ্রেণি ${selectedClass} এর চাদার পরিমাণ: ৳ ${classFees[selectedClass]}`;
+                }
+            });
+            
+            // ছাত্র ফর্ম সাবমিট
+            document.getElementById('studentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!isAdmin) {
+                    showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন ছাত্র যোগ করতে পারবেন!', 'error');
+                    return;
+                }
+                
+                const studentName = document.getElementById('studentName').value.trim();
+                const studentClass = document.getElementById('studentClass').value;
+                const studentAmount = parseInt(document.getElementById('studentAmount').value);
+                const paymentDate = document.getElementById('paymentDate').value;
+                const studentPhone = document.getElementById('studentPhone').value.trim();
+                const studentGuardian = document.getElementById('studentGuardian').value.trim();
+                const studentNote = document.getElementById('studentNote').value.trim();
+                
+                // ভ্যালিডেশন
+                if (!studentName || !studentClass || !studentAmount || !paymentDate) {
+                    showDatabaseStatus('ভুল ইনপুট', 'সমস্ত আবশ্যক তথ্য পূরণ করুন!', 'error');
+                    return;
+                }
+                
+                if (studentAmount <= 0) {
+                    showDatabaseStatus('ভুল ইনপুট', 'সঠিক পরিমাণ লিখুন!', 'error');
+                    return;
+                }
+                
+                const expectedAmount = classFees[studentClass];
+                
+                // ছাত্র আইডি তৈরি
+                const studentId = 'STU' + Date.now() + Math.random().toString(36).substr(2, 9);
+                
+                // ছাত্র অবজেক্ট তৈরি
+                const newStudent = {
+                    id: studentId,
+                    name: studentName,
+                    class: studentClass,
+                    amount: studentAmount,
+                    expectedAmount: expectedAmount,
+                    date: paymentDate,
+                    phone: studentPhone,
+                    guardian: studentGuardian,
+                    note: studentNote,
+                    status: studentAmount >= expectedAmount ? 'paid' : 'partial',
+                    addedDate: new Date().toISOString()
+                };
+                
+                // ডেটা স্টোরে যোগ করুন
+                students.push(newStudent);
+                
+                // JSON ফাইলে সেভ করুন
+                saveToFile('students.json', students);
+                
+                // ফর্ম রিসেট
+                this.reset();
+                document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+                
+                // ডেটা রিফ্রেশ
+                refreshAllData();
+                
+                showDatabaseStatus('ছাত্র যোগ হয়েছে', `${studentName} এর তথ্য JSON ফাইলে সেভ হয়েছে`, 'success');
+                
+                // সকল ছাত্র ট্যাবে যান
+                switchToTab('allStudentsTab');
+            });
+            
+            // কালার পিকার
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('categoryColor').value = this.getAttribute('data-color');
+                });
+            });
+            
+            // খাদ ফর্ম সাবমিট
+            document.getElementById('categoryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!isAdmin) {
+                    showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন খাদ যোগ করতে পারবেন!', 'error');
+                    return;
+                }
+                
+                const categoryName = document.getElementById('categoryName').value.trim();
+                const categoryColor = document.getElementById('categoryColor').value;
+                const categoryDescription = document.getElementById('categoryDescription').value.trim();
+                
+                // ভ্যালিডেশন
+                if (!categoryName) {
+                    showDatabaseStatus('ভুল ইনপুট', 'খাদের নাম পূরণ করুন!', 'error');
+                    return;
+                }
+                
+                // খাদ আইডি তৈরি
+                const categoryId = 'CAT' + Date.now() + Math.random().toString(36).substr(2, 9);
+                
+                // খাদ অবজেক্ট তৈরি
+                const newCategory = {
+                    id: categoryId,
+                    name: categoryName,
+                    color: categoryColor,
+                    description: categoryDescription,
+                    addedDate: new Date().toISOString()
+                };
+                
+                // ডেটা স্টোরে যোগ করুন
+                categories.push(newCategory);
+                
+                // JSON ফাইলে সেভ করুন
+                saveToFile('categories.json', categories);
+                
+                // ফর্ম রিসেট
+                this.reset();
+                document.querySelectorAll('.color-option').forEach((opt, index) => {
+                    if (index === 0) {
+                        opt.classList.add('selected');
+                        document.getElementById('categoryColor').value = opt.getAttribute('data-color');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+                
+                // ডেটা রিফ্রেশ
+                refreshAllData();
+                
+                showDatabaseStatus('খাদ যোগ হয়েছে', `${categoryName} খাদ JSON ফাইলে সেভ হয়েছে`, 'success');
+            });
+            
+            // খরচ ফর্ম সাবমিট
+            document.getElementById('expenseForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!isAdmin) {
+                    showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন খরচ যোগ করতে পারবেন!', 'error');
+                    return;
+                }
+                
+                const expenseName = document.getElementById('expenseName').value.trim();
+                const expenseCategory = document.getElementById('expenseCategory').value;
+                const expenseAmount = parseInt(document.getElementById('expenseAmount').value);
+                const expenseDate = document.getElementById('expenseDate').value;
+                const expenseDescription = document.getElementById('expenseDescription').value.trim();
+                const expenseReceipt = document.getElementById('expenseReceipt').value.trim();
+                const expensePaidTo = document.getElementById('expensePaidTo').value.trim();
+                
+                // ভ্যালিডেশন
+                if (!expenseName || !expenseCategory || !expenseAmount || !expenseDate || !expenseDescription) {
+                    showDatabaseStatus('ভুল ইনপুট', 'সমস্ত আবশ্যক তথ্য পূরণ করুন!', 'error');
+                    return;
+                }
+                
+                if (expenseAmount <= 0) {
+                    showDatabaseStatus('ভুল ইনপুট', 'সঠিক পরিমাণ লিখুন!', 'error');
+                    return;
+                }
+                
+                // খরচ আইডি তৈরি
+                const expenseId = 'EXP' + Date.now() + Math.random().toString(36).substr(2, 9);
+                
+                // খরচ অবজেক্ট তৈরি
+                const newExpense = {
+                    id: expenseId,
+                    name: expenseName,
+                    category: expenseCategory,
+                    amount: expenseAmount,
+                    date: expenseDate,
+                    description: expenseDescription,
+                    receipt: expenseReceipt,
+                    paidTo: expensePaidTo,
+                    addedDate: new Date().toISOString()
+                };
+                
+                // ডেটা স্টোরে যোগ করুন
+                expenses.push(newExpense);
+                
+                // JSON ফাইলে সেভ করুন
+                saveToFile('expenses.json', expenses);
+                
+                // ফর্ম রিসেট
+                this.reset();
+                document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+                
+                // ডেটা রিফ্রেশ
+                refreshAllData();
+                
+                showDatabaseStatus('খরচ যোগ হয়েছে', `${expenseName} এর তথ্য JSON ফাইলে সেভ হয়েছে`, 'success');
+            });
+            
+            // শ্রেণি ফিল্টার (সকল ছাত্র)
+            document.getElementById('classFilterAll').addEventListener('change', function() {
+                loadAllStudentTable();
+            });
+            
+            // চার্ট ফিল্টার
+            document.getElementById('chartFilter').addEventListener('change', function() {
+                updateAnalysisChart();
+            });
+            
+            // PDF প্রিভিউ বাটন
+            document.getElementById('previewReportBtn').addEventListener('click', function() {
+                previewPdfReport();
+            });
+            
+            // PDF ডাউনলোড বাটন
+            document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+                downloadCustomPdf();
+            });
+            
+            // ডাটাবেজ ফাইল লিস্ট আপডেট
+            updateDatabaseFileList();
+            
+            // সেটিংস লোড
+            loadSettings();
+        });
+        
+        // =================== JSON ফাইল অপারেশন ===================
+        
+        // ডেটা JSON ফাইলে সেভ করুন
+        async function saveToFile(filename, data) {
+            try {
+                const filepath = DATA_FOLDER + filename;
+                const jsonData = JSON.stringify(data, null, 2);
+                
+                // ফাইল সেভ করার সিমুলেশন (আসল সার্ভার থাকলে fetch API ব্যবহার করতে হবে)
+                localStorage.setItem('json_db_' + filename, jsonData);
+                
+                // ব্যাকআপ তৈরি করুন
+                createBackup(filename, data);
+                
+                lastSaveTime = new Date();
+                updateSaveTimeDisplay();
+                
+                console.log(`ডাটা সেভ হয়েছে: ${filename}`);
+                return true;
+            } catch (error) {
+                console.error('ডাটা সেভ করতে সমস্যা:', error);
+                showDatabaseStatus('সেভ ব্যর্থ', error.message, 'error');
+                return false;
+            }
+        }
+        
+        // JSON ফাইল থেকে ডাটা লোড করুন
+        async function loadFromFile(filename) {
+            try {
+                const filepath = DATA_FOLDER + filename;
+                
+                // ফাইল লোড করার সিমুলেশন
+                const savedData = localStorage.getItem('json_db_' + filename);
+                
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    lastLoadTime = new Date();
+                    updateLoadTimeDisplay();
+                    
+                    console.log(`ডাটা লোড হয়েছে: ${filename}`);
+                    return data;
+                } else {
+                    // ডিফল্ট ডেটা
+                    console.log(`নতুন ফাইল তৈরি হয়েছে: ${filename}`);
+                    return [];
+                }
+            } catch (error) {
+                console.error('ডাটা লোড করতে সমস্যা:', error);
+                showDatabaseStatus('লোড ব্যর্থ', error.message, 'error');
+                return [];
+            }
+        }
+        
+        // সব ডাটা সেভ করুন
+        async function saveAllData() {
+            try {
+                await saveToFile('students.json', students);
+                await saveToFile('expenses.json', expenses);
+                await saveToFile('categories.json', categories);
+                
+                // সেটিংস সেভ
+                saveSettings();
+                
+                showDatabaseStatus('সব ডাটা সেভ হয়েছে', 'সমস্ত ডাটা JSON ফাইলে সেভ করা হয়েছে', 'success');
+                return true;
+            } catch (error) {
+                showDatabaseStatus('সেভ ব্যর্থ', error.message, 'error');
+                return false;
+            }
+        }
+        
+        // সব ডাটা লোড করুন
+        async function loadAllData() {
+            try {
+                students = await loadFromFile('students.json') || [];
+                expenses = await loadFromFile('expenses.json') || [];
+                categories = await loadFromFile('categories.json') || [];
+                
+                // যদি কোন ডেটা না থাকে, ডিফল্ট ডেটা তৈরি করুন
+                if (categories.length === 0) {
+                    categories = [
+                        {
+                            id: 'CAT1',
+                            name: 'যানবাহন',
+                            color: '#4361ee',
+                            description: 'বাস, কার, ইত্যাদি ভাড়া',
+                            addedDate: new Date().toISOString()
+                        },
+                        {
+                            id: 'CAT2',
+                            name: 'খাবার',
+                            color: '#06d6a0',
+                            description: 'দুপুরের খাবার, নাস্তা, পানীয়',
+                            addedDate: new Date().toISOString()
+                        },
+                        {
+                            id: 'CAT3',
+                            name: 'প্রবেশ ফি',
+                            color: '#ff9e00',
+                            description: 'পার্ক প্রবেশ ফি',
+                            addedDate: new Date().toISOString()
+                        }
+                    ];
+                    await saveToFile('categories.json', categories);
+                }
+                
+                refreshAllData();
+                showDatabaseStatus('ডাটা লোড হয়েছে', 'সমস্ত ডাটা JSON ফাইল থেকে লোড করা হয়েছে', 'success');
+                return true;
+            } catch (error) {
+                showDatabaseStatus('লোড ব্যর্থ', error.message, 'error');
+                return false;
+            }
+        }
+        
+        // ব্যাকআপ তৈরি করুন
+        async function createBackup(filename, data) {
+            try {
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const backupFilename = `${filename.replace('.json', '')}_backup_${timestamp}.json`;
+                const backupPath = BACKUP_FOLDER + backupFilename;
+                
+                const backupData = {
+                    data: data,
+                    timestamp: new Date().toISOString(),
+                    filename: filename,
+                    version: '1.0'
+                };
+                
+                // ব্যাকআপ সেভ (সিমুলেশন)
+                localStorage.setItem('json_backup_' + backupFilename, JSON.stringify(backupData, null, 2));
+                
+                console.log(`ব্যাকআপ তৈরি হয়েছে: ${backupFilename}`);
+                return true;
+            } catch (error) {
+                console.error('ব্যাকআপ তৈরি করতে সমস্যা:', error);
+                return false;
+            }
+        }
+        
+        // সম্পূর্ণ ব্যাকআপ ডাউনলোড
+        function downloadFullBackup() {
+            const backupData = {
+                students: students,
+                expenses: expenses,
+                categories: categories,
+                timestamp: new Date().toISOString(),
+                version: '1.0',
+                system: 'পিকনিক বাজেট ম্যানেজমেন্ট'
+            };
+            
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const timestamp = new Date().toISOString().split('T')[0];
+            const exportFileDefaultName = `picnic_backup_${timestamp}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showDatabaseStatus('ব্যাকআপ ডাউনলোড', 'সম্পূর্ণ ডাটা JSON ফাইল হিসেবে ডাউনলোড হয়েছে', 'success');
+        }
+        
+        // ব্যাকআপ থেকে রিস্টোর
+        async function restoreFromBackup() {
+            const fileInput = document.getElementById('backupFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showDatabaseStatus('ব্যাকআপ ফাইল নেই', 'দয়া করে একটি JSON ব্যাকআপ ফাইল নির্বাচন করুন', 'warning');
+                return;
+            }
+            
+            if (!confirm('আপনি কি এই ব্যাকআপ থেকে ডাটা রিস্টোর করতে চান? বর্তমান ডাটা প্রতিস্থাপিত হবে!')) {
+                return;
+            }
+            
+            try {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        
+                        // ডাটা ভ্যালিডেশন
+                        if (!backupData.students || !backupData.expenses || !backupData.categories) {
+                            showDatabaseStatus('ভুল ফাইল', 'সঠিক ব্যাকআপ ফাইল নির্বাচন করুন', 'error');
+                            return;
+                        }
+                        
+                        students = backupData.students || [];
+                        expenses = backupData.expenses || [];
+                        categories = backupData.categories || [];
+                        
+                        // JSON ফাইলে সেভ করুন
+                        await saveAllData();
+                        
+                        refreshAllData();
+                        showDatabaseStatus('ডাটা রিস্টোর হয়েছে', 'ব্যাকআপ থেকে ডাটা সফলভাবে রিস্টোর হয়েছে', 'success');
+                        
+                        // ফাইল ইনপুট ক্লিয়ার
+                        fileInput.value = '';
+                    } catch (error) {
+                        showDatabaseStatus('ফাইল পড়তে সমস্যা', 'সঠিক JSON ফাইল নির্বাচন করুন', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            } catch (error) {
+                showDatabaseStatus('রিস্টোর ব্যর্থ', error.message, 'error');
+            }
+        }
+        
+        // পুরানো ব্যাকআপ মুছুন
+        function clearOldBackups() {
+            try {
+                const backupDays = parseInt(document.getElementById('backupDays').value) || 15;
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - backupDays);
+                
+                // লোকালস্টোরেজ থেকে পুরানো ব্যাকআপ মুছুন (সিমুলেশন)
+                let deletedCount = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('json_backup_')) {
+                        try {
+                            const backupData = JSON.parse(localStorage.getItem(key));
+                            const backupDate = new Date(backupData.timestamp);
+                            
+                            if (backupDate < cutoffDate) {
+                                localStorage.removeItem(key);
+                                deletedCount++;
+                            }
+                        } catch (e) {
+                            // ফাইল মুছে ফেলুন
+                            localStorage.removeItem(key);
+                        }
+                    }
+                }
+                
+                showDatabaseStatus('ব্যাকআপ ক্লিয়ার', `${deletedCount}টি পুরানো ব্যাকআপ মুছে ফেলা হয়েছে`, 'success');
+            } catch (error) {
+                showDatabaseStatus('ক্লিয়ার ব্যর্থ', error.message, 'error');
+            }
+        }
+        
+        // ডাটাবেজ ফাইল লিস্ট আপডেট
+        function updateDatabaseFileList() {
+            const fileList = document.getElementById('dbFileList');
+            if (!fileList) return;
+            
+            const files = [
+                { name: 'students.json', icon: 'fa-users', size: JSON.stringify(students).length },
+                { name: 'expenses.json', icon: 'fa-receipt', size: JSON.stringify(expenses).length },
+                { name: 'categories.json', icon: 'fa-tags', size: JSON.stringify(categories).length }
+            ];
+            
+            fileList.innerHTML = '';
+            
+            files.forEach(file => {
+                const sizeKB = (file.size / 1024).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'db-file-item';
+                item.innerHTML = `
+                    <div class="db-file-info">
+                        <i class="fas ${file.icon}"></i>
+                        <span>${file.name}</span>
+                        <span class="db-file-size">${sizeKB} KB</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    </div>
+                `;
+                fileList.appendChild(item);
+            });
+        }
+        
+        // সেটিংস লোড
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem('json_db_settings');
+                if (savedSettings) {
+                    const settings = JSON.parse(savedSettings);
+                    document.getElementById('autoSaveInterval').value = settings.autoSaveInterval || '60000';
+                    document.getElementById('backupDays').value = settings.backupDays || '15';
+                }
+            } catch (error) {
+                console.error('সেটিংস লোড করতে সমস্যা:', error);
+            }
+        }
+        
+        // সেটিংস সেভ
+        function saveSettings() {
+            try {
+                const settings = {
+                    autoSaveInterval: document.getElementById('autoSaveInterval').value,
+                    backupDays: document.getElementById('backupDays').value,
+                    savedAt: new Date().toISOString()
+                };
+                
+                localStorage.setItem('json_db_settings', JSON.stringify(settings));
+                
+                // অটো সেভ রিস্টার্ট
+                stopAutoSave();
+                startAutoSave();
+                
+                showDatabaseStatus('সেটিংস সেভ হয়েছে', 'সিস্টেম সেটিংস JSON ফাইলে সেভ হয়েছে', 'success');
+            } catch (error) {
+                showDatabaseStatus('সেটিংস সেভ ব্যর্থ', error.message, 'error');
+            }
+        }
+        
+        // অটো সেভ শুরু করুন
+        function startAutoSave() {
+            stopAutoSave(); // আগের ইন্টারভাল বন্ধ করুন
+            
+            const interval = parseInt(document.getElementById('autoSaveInterval').value) || 60000;
+            if (interval > 0) {
+                autoSaveInterval = setInterval(() => {
+                    saveAllData();
+                }, interval);
+                
+                console.log(`অটো সেভ শুরু হয়েছে: ${interval}ms`);
+            }
+        }
+        
+        // অটো সেভ বন্ধ করুন
+        function stopAutoSave() {
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+                autoSaveInterval = null;
+            }
+        }
+        
+        // সেভ টাইম আপডেট
+        function updateSaveTimeDisplay() {
+            const element = document.getElementById('lastSaveTime');
+            if (element && lastSaveTime) {
+                const timeStr = lastSaveTime.toLocaleTimeString('bn-BD');
+                element.textContent = `সর্বশেষ সেভ: ${timeStr}`;
+            }
+        }
+        
+        // লোড টাইম আপডেট
+        function updateLoadTimeDisplay() {
+            const element = document.getElementById('lastLoadTime');
+            if (element && lastLoadTime) {
+                const timeStr = lastLoadTime.toLocaleTimeString('bn-BD');
+                element.textContent = `সর্বশেষ লোড: ${timeStr}`;
+            }
+        }
+        
+        // ডাটাবেজ স্ট্যাটাস দেখান
+        function showDatabaseStatus(title, message, type = 'success') {
+            const statusElement = document.getElementById('databaseStatus');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            if (!statusElement || !statusTitle || !statusMessage) return;
+            
+            statusTitle.textContent = title;
+            statusMessage.textContent = message;
+            
+            // টাইপ অনুযায়ী স্টাইল
+            statusElement.className = 'database-status';
+            statusElement.classList.add(type);
+            
+            // শো করুন
+            statusElement.classList.remove('hidden');
+            
+            // ৫ সেকেন্ড পর হাইড করুন
+            setTimeout(() => {
+                statusElement.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // =================== PDF ডাউনলোড মডাল ফাংশন ===================
+        
+        // PDF ডাউনলোড মডাল ওপেন
+        function openPdfDownloadModal() {
+            if (!isAdmin) {
+                showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন PDF ডাউনলোড করতে পারবেন!', 'error');
+                return;
+            }
+            
+            document.getElementById('pdfDownloadModal').style.display = 'flex';
+        }
+        
+        // PDF ডাউনলোড মডাল ক্লোজ
+        function closePdfDownloadModal() {
+            document.getElementById('pdfDownloadModal').style.display = 'none';
+        }
+        
+        // =================== PDF রিপোর্ট সিস্টেম ===================
+        
+        // PDF রিপোর্ট প্রিভিউ দেখান
+        function previewPdfReport() {
+            const reportType = document.getElementById('reportType').value;
+            const reportClass = document.getElementById('reportClass').value;
+            const reportTitle = document.getElementById('reportTitle').value;
+            
+            const reportData = generateReportData(reportType, reportClass);
+            currentReportData = {
+                type: reportType,
+                class: reportClass,
+                title: reportTitle,
+                data: reportData
+            };
+            
+            const reportTemplate = generateReportTemplate(currentReportData);
+            document.getElementById('reportTemplate').innerHTML = reportTemplate;
+            
+            // মডাল শো করুন
+            document.getElementById('pdfPreviewModal').style.display = 'flex';
+        }
+        
+        // PDF প্রিভিউ বন্ধ করুন
+        function closePdfPreview() {
+            document.getElementById('pdfPreviewModal').style.display = 'none';
+        }
+        
+        // বর্তমান PDF ডাউনলোড করুন
+        function downloadCurrentPdf() {
+            if (!currentReportData) {
+                showDatabaseStatus('রিপোর্ট নেই', 'প্রথমে একটি রিপোর্ট প্রিভিউ করুন', 'warning');
+                return;
+            }
+            
+            generateAndDownloadPdf(currentReportData);
+        }
+        
+        // কাস্টম PDF ডাউনলোড
+        function downloadCustomPdf() {
+            const reportType = document.getElementById('reportType').value;
+            const reportClass = document.getElementById('reportClass').value;
+            const reportTitle = document.getElementById('reportTitle').value;
+            
+            const reportData = {
+                type: reportType,
+                class: reportClass,
+                title: reportTitle,
+                data: generateReportData(reportType, reportClass)
+            };
+            
+            generateAndDownloadPdf(reportData);
+        }
+        
+        // =================== PDF ডাউনলোড অপশন ফাংশন ===================
+        
+        // সম্পূর্ণ ডাটা PDF ডাউনলোড
+        function downloadAllDataPdf() {
+            const reportData = {
+                type: 'full',
+                class: '',
+                title: 'সম্পূর্ণ পিকনিক বাজেট রিপোর্ট',
+                data: generateReportData('full', '')
+            };
+            
+            generateAndDownloadPdf(reportData);
+            closePdfDownloadModal();
+        }
+        
+        // ছাত্র তালিকা PDF ডাউনলোড
+        function downloadStudentListPdf() {
+            const reportData = {
+                type: 'class',
+                class: '',
+                title: 'পিকনিক ছাত্র/ছাত্রী তালিকা',
+                data: generateReportData('class', '')
+            };
+            
+            generateAndDownloadPdf(reportData);
+            closePdfDownloadModal();
+        }
+        
+        // খরচ তালিকা PDF ডাউনলোড
+        function downloadExpenseListPdf() {
+            const reportData = {
+                type: 'expense',
+                class: '',
+                title: 'পিকনিক খরচ তালিকা',
+                data: generateReportData('expense', '')
+            };
+            
+            generateAndDownloadPdf(reportData);
+            closePdfDownloadModal();
+        }
+        
+        // সারাংশ রিপোর্ট PDF ডাউনলোড
+        function downloadSummaryReportPdf() {
+            const reportData = {
+                type: 'summary',
+                class: '',
+                title: 'পিকনিক বাজেট সারাংশ রিপোর্ট',
+                data: generateReportData('summary', '')
+            };
+            
+            generateAndDownloadPdf(reportData);
+            closePdfDownloadModal();
+        }
+        
+        // খাদ অনুযায়ী PDF ডাউনলোড
+        function downloadCategoryWisePdf() {
+            const reportData = {
+                type: 'expense',
+                class: '',
+                title: 'খাদ অনুযায়ী খরচ বিশ্লেষণ',
+                data: generateReportData('expense', '')
+            };
+            
+            generateAndDownloadPdf(reportData);
+            closePdfDownloadModal();
+        }
+        
+        // শ্রেণি অনুযায়ী PDF ডাউনলোড
+        function downloadClassWisePdf() {
+            const reportData = {
+                type: 'class',
+                class: '',
+                title: 'শ্রেণি অনুযায়ী আদায় বিশ্লেষণ',
+                data: generateReportData('class', '')
+            };
+            
+            generateAndDownloadPdf(reportData);
+            closePdfDownloadModal();
+        }
+        
+        // সব রিপোর্ট একসাথে ডাউনলোড
+        function downloadAllReports() {
+            showDatabaseStatus('PDF তৈরি হচ্ছে', 'সব রিপোর্ট PDF তৈরি করা হচ্ছে...', 'warning');
+            
+            // সম্পূর্ণ রিপোর্ট
+            setTimeout(() => {
+                downloadAllDataPdf();
+            }, 500);
+            
+            // ছাত্র তালিকা
+            setTimeout(() => {
+                const reportData = {
+                    type: 'class',
+                    class: '',
+                    title: 'পিকনিক ছাত্র/ছাত্রী তালিকা',
+                    data: generateReportData('class', '')
+                };
+                generateAndDownloadPdf(reportData);
+            }, 1500);
+            
+            // খরচ তালিকা
+            setTimeout(() => {
+                const reportData = {
+                    type: 'expense',
+                    class: '',
+                    title: 'পিকনিক খরচ তালিকা',
+                    data: generateReportData('expense', '')
+                };
+                generateAndDownloadPdf(reportData);
+            }, 2500);
+            
+            // সারাংশ রিপোর্ট
+            setTimeout(() => {
+                const reportData = {
+                    type: 'summary',
+                    class: '',
+                    title: 'পিকনিক বাজেট সারাংশ রিপোর্ট',
+                    data: generateReportData('summary', '')
+                };
+                generateAndDownloadPdf(reportData);
+            }, 3500);
+            
+            closePdfDownloadModal();
+        }
+        
+        // রিপোর্ট ডেটা জেনারেট করুন
+        function generateReportData(reportType, selectedClass) {
+            let filteredStudents = students;
+            let filteredExpenses = expenses;
+            
+            if (selectedClass) {
+                filteredStudents = students.filter(student => student.class == selectedClass);
+            }
+            
+            // মোট আদায়
+            const totalIncome = filteredStudents.reduce((sum, student) => sum + student.amount, 0);
+            
+            // মোট খরচ
+            const totalExpense = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            
+            // বাকি টাকা
+            const totalBalance = totalIncome - totalExpense;
+            
+            // খাদ অনুযায়ী খরচ
+            const categoryExpenses = {};
+            categories.forEach(category => {
+                const categoryExp = expenses.filter(exp => exp.category === category.id);
+                const categoryTotal = categoryExp.reduce((sum, exp) => sum + exp.amount, 0);
+                if (categoryTotal > 0) {
+                    categoryExpenses[category.name] = {
+                        total: categoryTotal,
+                        count: categoryExp.length,
+                        color: category.color
+                    };
+                }
+            });
+            
+            // শ্রেণি অনুযায়ী আদায়
+            const classIncome = {};
+            for (let i = 1; i <= 10; i++) {
+                const classStudents = filteredStudents.filter(s => s.class == i);
+                const classTotal = classStudents.reduce((sum, student) => sum + student.amount, 0);
+                if (classTotal > 0) {
+                    classIncome[`শ্রেণি ${i}`] = classTotal;
+                }
+            }
+            
+            return {
+                students: filteredStudents,
+                expenses: filteredExpenses,
+                categories: categories,
+                totals: {
+                    income: totalIncome,
+                    expense: totalExpense,
+                    balance: totalBalance,
+                    members: filteredStudents.length
+                },
+                categoryExpenses: categoryExpenses,
+                classIncome: classIncome,
+                generatedDate: new Date().toLocaleDateString('bn-BD'),
+                generatedTime: new Date().toLocaleTimeString('bn-BD')
+            };
+        }
+        
+        // রিপোর্ট টেমপ্লেট জেনারেট করুন
+        function generateReportTemplate(reportData) {
+            const { type, title, data } = reportData;
+            
+            let reportContent = '';
+            
+            // রিপোর্ট হেডার
+            reportContent += `
+                <div class="report-header">
+                    <h1 class="report-title">${title}</h1>
+                    <div class="report-date">
+                        জেনারেট করা হয়েছে: ${data.generatedDate} ${data.generatedTime}
+                    </div>
+                </div>
+            `;
+            
+            // সারাংশ সেকশন
+            reportContent += `
+                <div class="report-summary-section">
+                    <h2 style="color: var(--primary); margin-bottom: 20px;">সারাংশ</h2>
+                    <div class="summary-row">
+                        <span style="font-weight: 600;">মোট ছাত্র/ছাত্রী:</span>
+                        <span>${data.totals.members} জন</span>
+                    </div>
+                    <div class="summary-row">
+                        <span style="font-weight: 600;">মোট আদায়কৃত:</span>
+                        <span>৳ ${formatNumber(data.totals.income)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span style="font-weight: 600;">মোট খরচ:</span>
+                        <span>৳ ${formatNumber(data.totals.expense)}</span>
+                    </div>
+                    <div class="summary-row" style="border-bottom: none;">
+                        <span style="font-weight: 600;">বাকি টাকা:</span>
+                        <span style="color: ${data.totals.balance >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 700;">
+                            ৳ ${formatNumber(data.totals.balance)}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            // রিপোর্ট টাইপ অনুযায়ী কন্টেন্ট
+            if (type === 'class' || type === 'full') {
+                reportContent += generateStudentReportSection(data);
+            }
+            
+            if (type === 'expense' || type === 'full') {
+                reportContent += generateExpenseReportSection(data);
+            }
+            
+            if (type === 'summary') {
+                reportContent += generateSummaryReportSection(data);
+            }
+            
+            return reportContent;
+        }
+        
+        // ছাত্র রিপোর্ট সেকশন
+        function generateStudentReportSection(data) {
+            if (data.students.length === 0) {
+                return `<div style="text-align: center; padding: 20px; color: var(--gray);">কোন ছাত্র/ছাত্রী নেই</div>`;
+            }
+            
+            let studentRows = '';
+            data.students.forEach((student, index) => {
+                const status = student.amount >= student.expectedAmount ? 'পরিশোধিত' : 'আংশিক';
+                const statusColor = student.amount >= student.expectedAmount ? 'var(--success)' : 'var(--warning)';
+                
+                studentRows += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${student.name}</td>
+                        <td>শ্রেণি ${student.class}</td>
+                        <td>৳ ${formatNumber(student.expectedAmount)}</td>
+                        <td>৳ ${formatNumber(student.amount)}</td>
+                        <td>${formatDate(student.date)}</td>
+                        <td style="color: ${statusColor};">${status}</td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="page-break">
+                    <h2 style="color: var(--primary); margin-bottom: 20px;">ছাত্র/ছাত্রী তালিকা</h2>
+                    <table class="student-report-table">
+                        <thead>
+                            <tr>
+                                <th>ক্রম</th>
+                                <th>নাম</th>
+                                <th>শ্রেণি</th>
+                                <th>চাদা</th>
+                                <th>আদায়কৃত</th>
+                                <th>তারিখ</th>
+                                <th>অবস্থা</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${studentRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // খরচ রিপোর্ট সেকশন
+        function generateExpenseReportSection(data) {
+            if (data.expenses.length === 0) {
+                return `<div style="text-align: center; padding: 20px; color: var(--gray);">কোন খরচ নেই</div>`;
+            }
+            
+            let expenseContent = '<h2 style="color: var(--primary); margin-bottom: 20px;">খরচের বিবরণ</h2>';
+            
+            // খাদ অনুযায়ী গ্রুপিং
+            Object.keys(data.categoryExpenses).forEach(categoryName => {
+                const categoryData = data.categoryExpenses[categoryName];
+                const categoryExpenses = data.expenses.filter(exp => {
+                    const cat = data.categories.find(c => c.name === categoryName);
+                    return cat && exp.category === cat.id;
+                });
+                
+                expenseContent += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: var(--dark); margin-bottom: 15px; border-left: 4px solid ${categoryData.color}; padding-left: 15px;">
+                            ${categoryName} - মোট: ৳ ${formatNumber(categoryData.total)} (${categoryData.count}টি)
+                        </h3>
+                `;
+                
+                categoryExpenses.forEach(expense => {
+                    expenseContent += `
+                        <div class="expense-report-item">
+                            <div>
+                                <div style="font-weight: 600;">${expense.name}</div>
+                                <div style="font-size: 14px; color: var(--gray);">${expense.description}</div>
+                                ${expense.paidTo ? `<div style="font-size: 14px; color: var(--gray);">প্রাপক: ${expense.paidTo}</div>` : ''}
+                                ${expense.receipt ? `<div style="font-size: 14px; color: var(--gray);">রশিদ: ${expense.receipt}</div>` : ''}
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 700; color: var(--primary);">৳ ${formatNumber(expense.amount)}</div>
+                                <div style="font-size: 14px; color: var(--gray);">${formatDate(expense.date)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                expenseContent += `</div>`;
+            });
+            
+            return `<div class="page-break">${expenseContent}</div>`;
+        }
+        
+        // সারাংশ রিপোর্ট সেকশন
+        function generateSummaryReportSection(data) {
+            let summaryContent = '<h2 style="color: var(--primary); margin-bottom: 20px;">বিশ্লেষণ</h2>';
+            
+            // শ্রেণি অনুযায়ী আদায়
+            summaryContent += '<h3 style="color: var(--dark); margin: 20px 0 15px 0;">শ্রেণি অনুযায়ী আদায়</h3>';
+            Object.keys(data.classIncome).forEach(className => {
+                summaryContent += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--light-gray);">
+                        <span>${className}</span>
+                        <span style="font-weight: 600;">৳ ${formatNumber(data.classIncome[className])}</span>
+                    </div>
+                `;
+            });
+            
+            // খাদ অনুযায়ী খরচ
+            summaryContent += '<h3 style="color: var(--dark); margin: 20px 0 15px 0;">খাদ অনুযায়ী খরচ</h3>';
+            Object.keys(data.categoryExpenses).forEach(categoryName => {
+                const catData = data.categoryExpenses[categoryName];
+                summaryContent += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--light-gray);">
+                        <span>${categoryName}</span>
+                        <span style="font-weight: 600;">৳ ${formatNumber(catData.total)} (${catData.count}টি)</span>
+                    </div>
+                `;
+            });
+            
+            return `<div>${summaryContent}</div>`;
+        }
+        
+        // PDF তৈরি করুন এবং ডাউনলোড করুন
+        async function generateAndDownloadPdf(reportData) {
+            showDatabaseStatus('PDF তৈরি হচ্ছে', 'রিপোর্ট PDF তৈরি করা হচ্ছে...', 'warning');
+            
+            try {
+                // Report template তৈরি করুন
+                const reportTemplate = generateReportTemplate(reportData);
+                
+                // একটি temporary div তৈরি করুন
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                tempDiv.style.top = '0';
+                tempDiv.style.width = '794px'; // A4 width in pixels
+                tempDiv.style.padding = '40px';
+                tempDiv.style.backgroundColor = 'white';
+                tempDiv.innerHTML = reportTemplate;
+                
+                document.body.appendChild(tempDiv);
+                
+                // html2canvas ব্যবহার করে canvas তৈরি করুন
+                const canvas = await html2canvas(tempDiv, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+                
+                // Temporary div মুছে ফেলুন
+                document.body.removeChild(tempDiv);
+                
+                // Canvas থেকে image data নিন
+                const imgData = canvas.toDataURL('image/png');
+                
+                // jsPDF ইনিশিয়াল করুন
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // PDF সেটিংস
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                
+                // Image dimensions গণনা করুন
+                const imgWidth = pageWidth - 20; // Margin left-right
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                // PDF এ image যোগ করুন
+                let position = 10;
+                let remainingHeight = imgHeight;
+                
+                while (remainingHeight > 0) {
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    remainingHeight -= pageHeight;
+                    position -= pageHeight;
+                    
+                    if (remainingHeight > 0) {
+                        pdf.addPage();
+                    }
+                }
+                
+                // PDF ডাউনলোড করুন
+                const timestamp = new Date().toISOString().split('T')[0];
+                const reportType = reportData.type || 'full';
+                const filename = `picnic_${reportType}_report_${timestamp}.pdf`;
+                
+                pdf.save(filename);
+                
+                showDatabaseStatus('PDF ডাউনলোড', `${filename} ডাউনলোড শুরু হয়েছে`, 'success');
+                
+            } catch (error) {
+                console.error('PDF তৈরি করতে সমস্যা:', error);
+                showDatabaseStatus('PDF তৈরি ব্যর্থ', error.message, 'error');
+            }
+        }
+        
+        // PDF রিপোর্ট ফাংশন (কুইক ডাউনলোড)
+        window.downloadStudentReport = function() {
+            const reportData = {
+                type: 'class',
+                class: '',
+                title: 'ছাত্র রিপোর্ট - পিকনিক বাজেট ম্যানেজমেন্ট',
+                data: generateReportData('class', '')
+            };
+            generateAndDownloadPdf(reportData);
+        };
+        
+        window.downloadExpenseReport = function() {
+            const reportData = {
+                type: 'expense',
+                class: '',
+                title: 'খরচ রিপোর্ট - পিকনিক বাজেট ম্যানেজমেন্ট',
+                data: generateReportData('expense', '')
+            };
+            generateAndDownloadPdf(reportData);
+        };
+        
+        window.downloadCategoryReport = function() {
+            const reportData = {
+                type: 'expense',
+                class: '',
+                title: 'খাদ বিশ্লেষণ রিপোর্ট - পিকনিক বাজেট ম্যানেজমেন্ট',
+                data: generateReportData('expense', '')
+            };
+            generateAndDownloadPdf(reportData);
+        };
+        
+        window.downloadFullReport = function() {
+            const reportData = {
+                type: 'full',
+                class: '',
+                title: 'সম্পূর্ণ বাজেট রিপোর্ট - পিকনিক বাজেট ম্যানেজমেন্ট',
+                data: generateReportData('full', '')
+            };
+            generateAndDownloadPdf(reportData);
+        };
+        
+        window.userDownloadSummaryReport = function() {
+            const reportData = {
+                type: 'summary',
+                class: '',
+                title: 'সারাংশ রিপোর্ট - পিকনিক বাজেট ম্যানেজমেন্ট',
+                data: generateReportData('summary', '')
+            };
+            generateAndDownloadPdf(reportData);
+        };
+        
+        window.userDownloadStudentReport = function() {
+            downloadStudentReport();
+        };
+        
+        window.userDownloadExpenseReport = function() {
+            downloadExpenseReport();
+        };
+        
+        // =================== ইউটিলিটি ফাংশন ===================
+        
+        // সব ডেটা রিফ্রেশ
+        function refreshAllData() {
+            loadDashboardData();
+            loadCategories();
+            loadAllStudentTable();
+            loadUserData();
+            updateAnalysisChart();
+            updateDatabaseFileList();
+        }
+        
+        // ড্যাশবোর্ড ডেটা লোড
+        function loadDashboardData() {
+            // মোট আদায়
+            const totalIncome = students.reduce((sum, student) => sum + student.amount, 0);
+            document.getElementById('totalIncome').textContent = `৳ ${formatNumber(totalIncome)}`;
+            document.getElementById('userTotalIncome').textContent = `৳ ${formatNumber(totalIncome)}`;
+            
+            // মোট খরচ
+            const totalExpense = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            document.getElementById('totalExpense').textContent = `৳ ${formatNumber(totalExpense)}`;
+            document.getElementById('userTotalExpense').textContent = `৳ ${formatNumber(totalExpense)}`;
+            
+            // বাকি টাকা
+            const totalBalance = totalIncome - totalExpense;
+            document.getElementById('totalBalance').textContent = `৳ ${formatNumber(totalBalance)}`;
+            document.getElementById('userTotalBalance').textContent = `৳ ${formatNumber(totalBalance)}`;
+            
+            // মোট সদস্য
+            document.getElementById('totalMembers').textContent = students.length;
+            document.getElementById('userTotalMembers').textContent = students.length;
+        }
+        
+        // খাদ লোড
+        function loadCategories() {
+            const categorySelect = document.getElementById('expenseCategory');
+            const categoryList = document.getElementById('categoryList');
+            const categoryCount = document.getElementById('categoryCount');
+            
+            // সিলেক্ট অপশন ক্লিয়ার
+            categorySelect.innerHTML = '<option value="">খাদ নির্বাচন করুন</option>';
+            
+            // খাদ তালিকা ক্লিয়ার
+            categoryList.innerHTML = '';
+            
+            // খাদ সংখ্যা আপডেট
+            categoryCount.textContent = `মোট খাদ: ${categories.length}`;
+            
+            if (categories.length === 0) {
+                categoryList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tags"></i>
+                        <h3>কোন খাদ পাওয়া যায়নি</h3>
+                        <p>প্রথমে নতুন খাদ যোগ করুন</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // খাদ যোগ করুন
+            categories.forEach(category => {
+                // সিলেক্ট অপশন যোগ
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+                
+                // এই খাদের মোট খরচ গণনা
+                const categoryExpenses = expenses.filter(exp => exp.category === category.id);
+                const categoryTotal = categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                
+                // খাদ কার্ড তৈরি
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'category-card';
+                categoryCard.style.borderTopColor = category.color;
+                
+                categoryCard.innerHTML = `
+                    <div class="category-header">
+                        <div class="d-flex align-center gap-15">
+                            <div class="category-color" style="background: ${category.color}"></div>
+                            <div class="category-name">${category.name}</div>
+                        </div>
+                        <div class="category-total">৳ ${formatNumber(categoryTotal)}</div>
+                    </div>
+                    <p class="category-description">${category.description || 'কোন বিবরণ নেই'}</p>
+                    <div class="expense-footer">
+                        <div>
+                            <i class="fas fa-receipt"></i>
+                            মোট খরচ: ${categoryExpenses.length} টি
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-btn delete-btn" onclick="deleteCategory('${category.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                categoryList.appendChild(categoryCard);
+            });
+        }
+        
+        // সকল ছাত্র টেবিল লোড
+        function loadAllStudentTable() {
+            const selectedClass = document.getElementById('classFilterAll').value;
+            let filteredStudents = students;
+            
+            if (selectedClass) {
+                filteredStudents = students.filter(student => student.class == selectedClass);
+            }
+            
+            const tableBody = document.getElementById('allStudentTableBody');
+            const emptyState = document.getElementById('emptyAllStudentState');
+            
+            // টেবিল বডি ক্লিয়ার
+            tableBody.innerHTML = '';
+            
+            if (filteredStudents.length === 0) {
+                tableBody.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                tableBody.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            }
+            
+            // টেবিল রো যোগ
+            filteredStudents.forEach((student, index) => {
+                const row = document.createElement('tr');
+                
+                const statusText = student.status === 'paid' ? 'পরিশোধিত' : 'আংশিক';
+                const statusClass = student.status === 'paid' ? 'status-paid' : 'status-pending';
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <div><strong>${student.name}</strong></div>
+                        ${student.guardian ? `<div style="font-size: 13px; color: var(--gray);">${student.guardian}</div>` : ''}
+                        ${student.phone ? `<div style="font-size: 13px; color: var(--gray);">${student.phone}</div>` : ''}
+                    </td>
+                    <td>শ্রেণি ${student.class}</td>
+                    <td>৳ ${formatNumber(classFees[student.class])}</td>
+                    <td>৳ ${formatNumber(student.amount)}</td>
+                    <td>${formatDate(student.date)}</td>
+                    <td><span class="status ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editStudent('${student.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteStudent('${student.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // ইউজার ডেটা লোড
+        function loadUserData() {
+            // ইউজার ড্যাশবোর্ডে স্ট্যাটস ইতিমধ্যে লোড হয়েছে
+        }
+        
+        // বিশ্লেষণ চার্ট আপডেট
+        function updateAnalysisChart() {
+            const chartType = document.getElementById('chartFilter').value;
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            
+            // বিদ্যমান চার্ট ডেস্ট্রয় করুন
+            if (window.analysisChart) {
+                window.analysisChart.destroy();
+            }
+            
+            if (chartType === 'expense') {
+                // খাদ অনুযায়ী খরচ গ্রুপিং
+                const expenseData = {};
+                categories.forEach(category => {
+                    const categoryExpenses = expenses.filter(exp => exp.category === category.id);
+                    const categoryTotal = categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                    if (categoryTotal > 0) {
+                        expenseData[category.name] = categoryTotal;
+                    }
+                });
+                
+                const labels = Object.keys(expenseData);
+                const data = Object.values(expenseData);
+                const colors = labels.map(label => {
+                    const category = categories.find(cat => cat.name === label);
+                    return category ? category.color : '#4361ee';
+                });
+                
+                // নতুন চার্ট তৈরি করুন
+                window.analysisChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    padding: 20
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'খাদ অনুযায়ী খরচ বিশ্লেষণ',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } else if (chartType === 'class') {
+                // শ্রেণি অনুযায়ী আদায় গ্রুপিং
+                const classData = {};
+                for (let i = 1; i <= 10; i++) {
+                    const classStudents = students.filter(s => s.class == i);
+                    const totalPaid = classStudents.reduce((sum, student) => sum + student.amount, 0);
+                    if (totalPaid > 0) {
+                        classData[`শ্রেণি ${i}`] = totalPaid;
+                    }
+                }
+                
+                const labels = Object.keys(classData);
+                const data = Object.values(classData);
+                
+                // রং এর অ্যারে
+                const classColors = ['#4361ee', '#06d6a0', '#ff9e00', '#ef476f', '#7209b7', '#3a0ca3', '#4cc9f0', '#f72585', '#4895ef', '#560bad'];
+                
+                // নতুন চার্ট তৈরি করুন
+                window.analysisChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'আদায়কৃত টাকা',
+                            data: data,
+                            backgroundColor: classColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'শ্রেণি অনুযায়ী আদায় বিশ্লেষণ',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '৳ ' + formatNumber(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // ট্যাব স্যুইচ ফাংশন
+        window.switchToTab = function(tabId) {
+            // সক্রিয় ট্যাব আপডেট
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            // ট্যাব কন্টেন্ট আপডেট
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            // কিছু ট্যাবের জন্য বিশেষ লোডিং
+            if (tabId === 'allStudentsTab') {
+                loadAllStudentTable();
+            } else if (tabId === 'databaseTab') {
+                updateDatabaseFileList();
+                updateSaveTimeDisplay();
+                updateLoadTimeDisplay();
+            } else if (tabId === 'reportTab' && isAdmin) {
+                // রিপোর্ট ট্যাবে গেলে ফিল্টার রিসেট
+                document.getElementById('reportClass').value = '';
+            }
+        };
+        
+        // ছাত্র সম্পাদনা
+        window.editStudent = function(studentId) {
+            if (!isAdmin) {
+                showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন ছাত্র সম্পাদনা করতে পারবেন!', 'error');
+                return;
+            }
+            
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            // ছাত্র ট্যাবে যান
+            switchToTab('studentTab');
+            
+            // ফর্ম পূরণ করুন
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('studentClass').value = student.class;
+            document.getElementById('studentAmount').value = student.amount;
+            document.getElementById('paymentDate').value = student.date;
+            document.getElementById('studentPhone').value = student.phone || '';
+            document.getElementById('studentGuardian').value = student.guardian || '';
+            document.getElementById('studentNote').value = student.note || '';
+            
+            // সম্পাদনা মোডে সেট করুন
+            const form = document.getElementById('studentForm');
+            form.setAttribute('data-edit-id', studentId);
+            
+            // ফর্ম সাবমিট ইভেন্ট পরিবর্তন
+            const originalSubmit = form.onsubmit;
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                
+                const studentName = document.getElementById('studentName').value.trim();
+                const studentClass = document.getElementById('studentClass').value;
+                const studentAmount = parseInt(document.getElementById('studentAmount').value);
+                const paymentDate = document.getElementById('paymentDate').value;
+                const studentPhone = document.getElementById('studentPhone').value.trim();
+                const studentGuardian = document.getElementById('studentGuardian').value.trim();
+                const studentNote = document.getElementById('studentNote').value.trim();
+                
+                // ভ্যালিডেশন
+                if (!studentName || !studentClass || !studentAmount || !paymentDate) {
+                    showDatabaseStatus('ভুল ইনপুট', 'সমস্ত আবশ্যক তথ্য পূরণ করুন!', 'error');
+                    return;
+                }
+                
+                const expectedAmount = classFees[studentClass];
+                
+                // ছাত্র আপডেট
+                const index = students.findIndex(s => s.id === studentId);
+                if (index !== -1) {
+                    students[index] = {
+                        ...students[index],
+                        name: studentName,
+                        class: studentClass,
+                        amount: studentAmount,
+                        expectedAmount: expectedAmount,
+                        date: paymentDate,
+                        phone: studentPhone,
+                        guardian: studentGuardian,
+                        note: studentNote,
+                        status: studentAmount >= expectedAmount ? 'paid' : 'partial'
+                    };
+                    
+                    // JSON ফাইলে সেভ করুন
+                    saveToFile('students.json', students);
+                    
+                    // ফর্ম রিসেট
+                    form.reset();
+                    form.removeAttribute('data-edit-id');
+                    form.onsubmit = originalSubmit;
+                    
+                    // আজকের তারিখ সেট করুন
+                    document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+                    
+                    // ডেটা রিফ্রেশ
+                    refreshAllData();
+                    
+                    showDatabaseStatus('ছাত্র আপডেট হয়েছে', `${studentName} এর তথ্য JSON ফাইলে আপডেট হয়েছে`, 'success');
+                    
+                    // সকল ছাত্র ট্যাবে যান
+                    switchToTab('allStudentsTab');
+                }
+            };
+            
+            showDatabaseStatus('সম্পাদনা মোড', 'ছাত্রের তথ্য সম্পাদনা মোডে আছে', 'warning');
+        };
+        
+        // ছাত্র মুছে ফেলা
+        window.deleteStudent = function(studentId) {
+            if (!isAdmin) {
+                showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন ছাত্র মুছে ফেলতে পারবেন!', 'error');
+                return;
+            }
+            
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            if (!confirm(`আপনি কি ${student.name} এর তথ্য মুছে ফেলতে চান?`)) return;
+            
+            students = students.filter(s => s.id !== studentId);
+            
+            // JSON ফাইলে সেভ করুন
+            saveToFile('students.json', students);
+            
+            refreshAllData();
+            
+            showDatabaseStatus('ছাত্র মুছে ফেলা হয়েছে', `${student.name} এর তথ্য JSON ফাইল থেকে মুছে ফেলা হয়েছে`, 'success');
+        };
+        
+        // খাদ মুছে ফেলা
+        window.deleteCategory = function(categoryId) {
+            if (!isAdmin) {
+                showDatabaseStatus('অনুমতি নেই', 'শুধুমাত্র অ্যাডমিন খাদ মুছে ফেলতে পারবেন!', 'error');
+                return;
+            }
+            
+            const category = categories.find(c => c.id === categoryId);
+            if (!category) return;
+            
+            // এই খাদে কি কোন খরচ আছে?
+            const categoryExpenses = expenses.filter(exp => exp.category === categoryId);
+            let warningMessage = `আপনি কি "${category.name}" খাদ মুছে ফেলতে চান?`;
+            
+            if (categoryExpenses.length > 0) {
+                warningMessage = `এই খাদে ${categoryExpenses.length}টি খরচ আছে। আপনি কি "${category.name}" খাদ মুছে ফেলতে চান? এই খাদের সকল খরচও মুছে যাবে!`;
+            }
+            
+            if (!confirm(warningMessage)) return;
+            
+            // খাদ মুছে ফেলা
+            categories = categories.filter(c => c.id !== categoryId);
+            
+            // এই খাদের সকল খরচ মুছে ফেলা
+            expenses = expenses.filter(exp => exp.category !== categoryId);
+            
+            // JSON ফাইলে সেভ করুন
+            saveToFile('categories.json', categories);
+            saveToFile('expenses.json', expenses);
+            
+            refreshAllData();
+            
+            showDatabaseStatus('খাদ মুছে ফেলা হয়েছে', `${category.name} খাদ ও সম্পর্কিত খরচ JSON ফাইল থেকে মুছে ফেলা হয়েছে`, 'success');
+        };
+        
+        // ইউটিলিটি ফাংশন
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('bn-BD');
+            } catch (error) {
+                return dateStr;
+            }
+        }
+    </script>
+</body>
+</html>
