@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NeoCSV • File Converter</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    height:100vh;
+    font-family:'Space Grotesk',sans-serif;
+    background:
+      radial-gradient(circle at top,#1f2937,#020617);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#e5e7eb;
+}
+.neo-card{
+    width:460px;
+    padding:40px;
+    border-radius:28px;
+    background:linear-gradient(145deg,#0f172a,#020617);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.06),
+      0 30px 80px rgba(0,0,0,.8);
+    position:relative;
+    overflow:hidden;
+}
+.neo-card::before{
+    content:'';
+    position:absolute;
+    inset:-2px;
+    border-radius:30px;
+    background:linear-gradient(120deg,#22d3ee,#818cf8,#22d3ee);
+    opacity:.15;
+    filter:blur(25px);
+    z-index:-1;
+}
+.logo{
+    text-align:center;
+    font-weight:700;
+    font-size:28px;
+    letter-spacing:1px;
+}
+.logo span{
+    color:#22d3ee;
+}
+.subtitle{
+    text-align:center;
+    font-size:14px;
+    opacity:.75;
+    margin:8px 0 28px;
+}
+.uploader{
+    border-radius:22px;
+    padding:28px;
+    background:linear-gradient(145deg,#020617,#0f172a);
+    box-shadow:
+      inset 6px 6px 12px rgba(0,0,0,.6),
+      inset -6px -6px 12px rgba(255,255,255,.03);
+    text-align:center;
+    cursor:pointer;
+    transition:.4s;
+}
+.uploader:hover{
+    box-shadow:
+      inset 4px 4px 10px rgba(0,0,0,.6),
+      inset -4px -4px 10px rgba(255,255,255,.06);
+}
+.uploader input{display:none}
+.uploader strong{
+    display:block;
+    font-size:16px;
+}
+.uploader small{
+    opacity:.7;
+    font-size:12px;
+}
+.filename{
+    margin-top:10px;
+    font-size:13px;
+    color:#22d3ee;
+}
+.action{
+    margin-top:28px;
+}
+button{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:50px;
+    font-size:16px;
+    font-weight:600;
+    background:linear-gradient(135deg,#22d3ee,#818cf8);
+    color:#020617;
+    cursor:pointer;
+    transition:.4s;
+}
+button:hover{
+    transform:translateY(-3px);
+    box-shadow:0 15px 40px rgba(34,211,238,.45);
+}
+.status{
+    text-align:center;
+    margin-top:16px;
+    font-size:12px;
+    opacity:.8;
+}
+.badges{
+    display:flex;
+    justify-content:space-between;
+    margin-top:26px;
+    font-size:11px;
+    opacity:.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="neo-card">
+    <div class="logo">Neo<span>CSV</span></div>
+    <div class="subtitle">Minimal • Private • High-Speed Converter</div>
+
+    <label class="uploader">
+        <input type="file" id="file" accept=".txt,.xlsx" onchange="showName()">
+        <strong>Drop or Select File</strong>
+        <small>Supports TXT & XLSX only</small>
+        <div class="filename" id="name"></div>
+    </label>
+
+    <div class="action">
+        <button onclick="convert()">Convert to CSV</button>
+    </div>
+
+    <div class="status" id="status">Status: Ready</div>
+
+    <div class="badges">
+        <span>🚀 Client-Side</span>
+        <span>🔐 Zero Upload</span>
+        <span>⚡ Instant</span>
+    </div>
+</div>
+
+<script>
+function showName(){
+    const f=document.getElementById('file').files[0];
+    document.getElementById('name').innerText=f?f.name:"";
+    document.getElementById('status').innerText="Status: File Loaded";
+}
+
+function convert(){
+    const f=document.getElementById('file').files[0];
+    if(!f){alert("Select file first");return;}
+    document.getElementById('status').innerText="Status: Converting...";
+
+    const name=f.name.toLowerCase();
+    if(name.endsWith('.txt')){
+        const r=new FileReader();
+        r.onload=e=>{
+            const csv=e.target.result.split('\n')
+              .filter(l=>l.trim())
+              .map(l=>`"${l.replace(/"/g,'""')}"`)
+              .join('\n');
+            download(csv,f.name.replace('.txt','.csv'));
+        };
+        r.readAsText(f);
+    }else{
+        const r=new FileReader();
+        r.onload=e=>{
+            const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+            const sheet=wb.Sheets[wb.SheetNames[0]];
+            const csv=XLSX.utils.sheet_to_csv(sheet);
+            download(csv,f.name.replace('.xlsx','.csv'));
+        };
+        r.readAsArrayBuffer(f);
+    }
+}
+
+function download(data,name){
+    const blob=new Blob([data],{type:'text/csv'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=name;
+    a.click();
+    document.getElementById('status').innerText="Status: Downloaded ✔";
+}
+</script>
+
+</body>
+</html>
